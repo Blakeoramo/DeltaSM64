@@ -68,17 +68,13 @@ endif
 DEFINES += NO_ERRNO_H=1 NO_GZIP=1
 
 COMPRESS ?= rnc1
-$(eval $(call validate-option,COMPRESS,mio0 yay0 gzip rnc1 rnc2 uncomp))
+$(eval $(call validate-option,COMPRESS,gzip rnc1 rnc2 uncomp))
 ifeq ($(COMPRESS),gzip)
   DEFINES += GZIP=1
 else ifeq ($(COMPRESS),rnc1)
   DEFINES += RNC1=1
 else ifeq ($(COMPRESS),rnc2)
   DEFINES += RNC2=1
-else ifeq ($(COMPRESS),yay0)
-  DEFINES += YAY0=1
-else ifeq ($(COMPRESS),mio0)
-  DEFINES += MIO0=1
 else ifeq ($(COMPRESS),uncomp)
   DEFINES += UNCOMPRESSED=1
 endif
@@ -112,18 +108,12 @@ TARGET := sm64.$(VERSION)
 
 
 # GRUCODE - selects which RSP microcode to use.
-#   f3dex   -
-#   f3dex2  -
 #   l3dex2  - F3DEX2 version that only renders in wireframe
 #   f3dzex  - newer, experimental microcode used in Animal Crossing
 #   super3d - extremely experimental version of Fast3D lacking many features for speed
-$(eval $(call validate-option,GRUCODE,f3dex f3dex2 f3dex2pl f3dzex super3d l3dex2))
+$(eval $(call validate-option,GRUCODE,f3d_old f3dex f3dex2 f3dex2pl f3d_new f3dzex super3d l3dex2))
 
-ifeq ($(GRUCODE),f3dex) # Fast3DEX
-  DEFINES += F3DEX_GBI=1 F3DEX_GBI_SHARED=1
-else ifeq ($(GRUCODE),f3dex2) # Fast3DEX2
-  DEFINES += F3DEX_GBI_2=1 F3DEX_GBI_SHARED=1
-else ifeq ($(GRUCODE),l3dex2) # Line3DEX2
+ifeq ($(GRUCODE),l3dex2) # Line3DEX2
   DEFINES += L3DEX2_GBI=1 L3DEX2_ALONE=1 F3DEX_GBI_2=1 F3DEX_GBI_SHARED=1
 else ifeq ($(GRUCODE),f3dex2pl) # Fast3DEX2_PosLight
   DEFINES += F3DEX2PL_GBI=1 F3DEX_GBI_2=1 F3DEX_GBI_SHARED=1
@@ -182,7 +172,7 @@ endif
 COMPARE ?= 0
 $(eval $(call validate-option,COMPARE,0 1))
 
-TARGET_STRING := sm64.$(VERSION).$(CONSOLE).$(GRUCODE)
+TARGET_STRING := deltasm64
 # If non-default settings were chosen, disable COMPARE
 ifeq ($(filter $(TARGET_STRING), sm64.jp.f3d_old sm64.us.f3d_old sm64.eu.f3d_new sm64.sh.f3d_new),)
   COMPARE := 0
@@ -294,6 +284,7 @@ ifeq ($(filter clean distclean print-%,$(MAKECMDGOALS)),)
       $(error Failed to extract assets)
     endif
   endif
+
 
   # Make tools if out of date
   $(info Building tools...)
@@ -448,7 +439,6 @@ CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
 
 # N64 tools
 YAY0TOOL              := $(TOOLS_DIR)/slienc
-MIO0TOOL              := $(TOOLS_DIR)/mio0
 RNCPACK               := $(TOOLS_DIR)/rncpack
 ROMALIGN              := $(TOOLS_DIR)/romalign
 FILESIZER             := $(TOOLS_DIR)/filesizer
@@ -473,7 +463,7 @@ else
   RSPASM              := $(TOOLS_DIR)/armips
 endif
 ENDIAN_BITWIDTH       := $(BUILD_DIR)/endian-and-bitwidth
-EMULATOR = ~/Downloads/mupen64plus/mupen64plus-gui
+EMULATOR = 
 EMU_FLAGS = 
 LOADER = loader64
 LOADER_FLAGS = -vwf
@@ -493,6 +483,7 @@ endif
 ifneq ($(COMPILER),ido)
   EXTRACT_DATA_FOR_MIO := $(OBJCOPY) -O binary --only-section=.data
 endif
+
 
 # Common build print status function
 define print
@@ -517,7 +508,6 @@ clean:
 	make -C src/s2d_engine clean
 
 distclean: clean
-	$(PYTHON) extract_assets.py --clean
 	$(MAKE) -C $(TOOLS_DIR) clean
 
 test: $(ROM)
@@ -641,10 +631,6 @@ else ifeq ($(COMPRESS),rnc1)
 include rnc1rules.mk
 else ifeq ($(COMPRESS),rnc2)
 include rnc2rules.mk
-else ifeq ($(COMPRESS),yay0)
-include yay0rules.mk
-else ifeq ($(COMPRESS),mio0)
-include mio0rules.mk
 else ifeq ($(COMPRESS),uncomp)
 include uncomprules.mk
 endif
