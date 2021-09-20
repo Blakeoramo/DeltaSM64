@@ -575,7 +575,6 @@ void puppycam_init(void)
     gPuppyCam.framesSinceC[0] = 10; //This just exists to stop input type B being stupid.
     gPuppyCam.framesSinceC[1] = 10; //This just exists to stop input type B being stupid.
     gPuppyCam.mode3Flags = PUPPYCAM_MODE3_ZOOMED_MED;
-    gPuppyCam.debugFlags = PUPPYDEBUG_LOCK_CONTROLS;
     puppycam_reset_values();
 }
 
@@ -901,63 +900,25 @@ static void puppycam_input_press(void)
 
 void puppycam_debug_view(void)
 {
-    if (gPuppyCam.debugFlags & PUPPYDEBUG_LOCK_CONTROLS)
+    if (ABS(gPlayer1Controller->rawStickX) > DEADZONE)
     {
-        if (ABS(gPlayer1Controller->rawStickX) > DEADZONE)
-        {
-            gPuppyCam.pos[0] += (gPlayer1Controller->rawStickX/4) * -sins(gPuppyCam.yawTarget);
-            gPuppyCam.pos[2] += (gPlayer1Controller->rawStickX/4) * coss(gPuppyCam.yawTarget);
-        }
-        if (ABS(gPlayer1Controller->rawStickY) > DEADZONE)
-        {
-            gPuppyCam.pos[0] += (gPlayer1Controller->rawStickY/4) * coss(gPuppyCam.yawTarget);
-            gPuppyCam.pos[1] += (gPlayer1Controller->rawStickY/4) * sins(gPuppyCam.pitchTarget);
-            gPuppyCam.pos[2] += (gPlayer1Controller->rawStickY/4) * sins(gPuppyCam.yawTarget);
-        }
-        if (gPlayer1Controller->buttonDown & Z_TRIG || gPlayer1Controller->buttonDown & L_TRIG)
-            gPuppyCam.pos[1] -= 20;
-        if (gPlayer1Controller->buttonDown & R_TRIG)
-            gPuppyCam.pos[1] += 20;
-
-        gPuppyCam.focus[0] = gPuppyCam.pos[0] + (100 *coss(gPuppyCam.yawTarget));
-        gPuppyCam.focus[1] = gPuppyCam.pos[1] + (100 *sins(gPuppyCam.pitchTarget));
-        gPuppyCam.focus[2] = gPuppyCam.pos[2] + (100 *sins(gPuppyCam.yawTarget));
+        gPuppyCam.pos[0] += (gPlayer1Controller->rawStickX/4) * -sins(gPuppyCam.yawTarget);
+        gPuppyCam.pos[2] += (gPlayer1Controller->rawStickX/4) * coss(gPuppyCam.yawTarget);
     }
-    else
+    if (ABS(gPlayer1Controller->rawStickY) > DEADZONE)
     {
-        if (gPuppyCam.debugFlags & PUPPYDEBUG_TRACK_MARIO)
-        {
-            gPuppyCam.focus[0] = gPuppyCam.targetObj->oPosX;
-            gPuppyCam.focus[1] = gPuppyCam.targetObj->oPosY;
-            gPuppyCam.focus[2] = gPuppyCam.targetObj->oPosZ;
-        }
-
-        gPuppyCam.yawTarget = atan2s(gPuppyCam.pos[2] - gPuppyCam.focus[2], gPuppyCam.pos[0] - gPuppyCam.focus[0]);
-        gPuppyCam.pitchTarget = atan2s(gPuppyCam.pos[1] - gPuppyCam.focus[1], 100);
+        gPuppyCam.pos[0] += (gPlayer1Controller->rawStickY/4) * coss(gPuppyCam.yawTarget);
+        gPuppyCam.pos[1] += (gPlayer1Controller->rawStickY/4) * sins(gPuppyCam.pitchTarget);
+        gPuppyCam.pos[2] += (gPlayer1Controller->rawStickY/4) * sins(gPuppyCam.yawTarget);
     }
+    if (gPlayer1Controller->buttonDown & Z_TRIG || gPlayer1Controller->buttonDown & L_TRIG)
+        gPuppyCam.pos[1] -= 20;
+    if (gPlayer1Controller->buttonDown & R_TRIG)
+        gPuppyCam.pos[1] += 20;
 
-    gPuppyCam.yaw = gPuppyCam.yawTarget;
-    gPuppyCam.pitch = gPuppyCam.pitchTarget;
-
-    if (gPlayer1Controller->buttonPressed & A_BUTTON && gPuppyCam.debugFlags & PUPPYDEBUG_LOCK_CONTROLS)
-    {
-        vec3f_set(gMarioState->pos, gPuppyCam.pos[0], gPuppyCam.pos[1], gPuppyCam.pos[2]);
-    }
-    if (gPlayer1Controller->buttonPressed & B_BUTTON)
-    {
-        if (gPuppyCam.debugFlags & PUPPYDEBUG_LOCK_CONTROLS)
-            gPuppyCam.debugFlags &= ~PUPPYDEBUG_LOCK_CONTROLS;
-        else
-            gPuppyCam.debugFlags |= PUPPYDEBUG_LOCK_CONTROLS;
-    }
-
-    if (gPlayer1Controller->buttonPressed & R_TRIG && !(gPuppyCam.debugFlags & PUPPYDEBUG_LOCK_CONTROLS))
-    {
-        if (gPuppyCam.debugFlags & PUPPYDEBUG_TRACK_MARIO)
-            gPuppyCam.debugFlags &= ~PUPPYDEBUG_TRACK_MARIO;
-        else
-            gPuppyCam.debugFlags |= PUPPYDEBUG_TRACK_MARIO;
-    }
+    gPuppyCam.focus[0] = gPuppyCam.pos[0] + (100 *coss(gPuppyCam.yawTarget));
+    gPuppyCam.focus[1] = gPuppyCam.pos[1] + (100 *sins(gPuppyCam.pitchTarget));
+    gPuppyCam.focus[2] = gPuppyCam.pos[2] + (100 *sins(gPuppyCam.yawTarget));
 }
 
 static void puppycam_view_panning(void)
@@ -1446,7 +1407,6 @@ static void puppycam_script(void)
 //Handles collision detection using ray casting.
 static void puppycam_collision(void)
 {
-    struct WallCollisionData wall0, wall1;
     struct Surface *surf[2];
     Vec3f camdir[2];
     Vec3f hitpos[2];
@@ -1476,8 +1436,8 @@ static void puppycam_collision(void)
 
     find_surface_on_ray(target[0], camdir[0], &surf[0], hitpos[0], RAYCAST_FIND_FLOOR | RAYCAST_FIND_CEIL | RAYCAST_FIND_WALL);
     find_surface_on_ray(target[1], camdir[1], &surf[1], hitpos[1], RAYCAST_FIND_FLOOR | RAYCAST_FIND_CEIL | RAYCAST_FIND_WALL);
-    resolve_and_return_wall_collisions(hitpos[0], 0.0f, 25.0f, &wall0);
-    resolve_and_return_wall_collisions(hitpos[1], 0.0f, 25.0f, &wall1);
+    resolve_and_return_wall_collisions(hitpos[0], 0.0f, 25.0f);
+    resolve_and_return_wall_collisions(hitpos[1], 0.0f, 25.0f);
     dist[0] = ((target[0][0] - hitpos[0][0]) * (target[0][0] - hitpos[0][0]) + (target[0][1] - hitpos[0][1]) * (target[0][1] - hitpos[0][1]) + (target[0][2] - hitpos[0][2]) * (target[0][2] - hitpos[0][2]));
     dist[1] = ((target[1][0] - hitpos[1][0]) * (target[1][0] - hitpos[1][0]) + (target[1][1] - hitpos[1][1]) * (target[1][1] - hitpos[1][1]) + (target[1][2] - hitpos[1][2]) * (target[1][2] - hitpos[1][2]));
 

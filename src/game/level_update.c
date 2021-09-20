@@ -562,11 +562,9 @@ void check_instant_warp(void) {
                 gMarioState->marioObj->oPosX = gMarioState->pos[0];
                 gMarioState->marioObj->oPosY = gMarioState->pos[1];
                 gMarioState->marioObj->oPosZ = gMarioState->pos[2];
-            #ifdef INSTANT_WARP_OFFSET_FIX
                 gMarioObject->header.gfx.pos[0] = gMarioState->pos[0];
                 gMarioObject->header.gfx.pos[1] = gMarioState->pos[1];
                 gMarioObject->header.gfx.pos[2] = gMarioState->pos[2];
-            #endif
                 cameraAngle = gMarioState->area->camera->yaw;
 
                 change_area(warp->area);
@@ -583,8 +581,6 @@ void check_instant_warp(void) {
 s16 music_unchanged_through_warp(s16 arg) {
     struct ObjectWarpNode *warpNode = area_get_warp_node(arg);
     s16 levelNum = warpNode->node.destLevel & 0x7F;
-
-#if BUGFIX_KOOPA_RACE_MUSIC
 
     s16 destArea = warpNode->node.destArea;
     s16 unchanged = TRUE;
@@ -608,21 +604,6 @@ s16 music_unchanged_through_warp(s16 arg) {
         }
     }
     return unchanged;
-
-#else
-
-    u16 destParam1 = gAreas[warpNode->node.destArea].musicParam;
-    u16 destParam2 = gAreas[warpNode->node.destArea].musicParam2;
-
-    s16 unchanged = levelNum == gCurrLevelNum && destParam1 == gCurrentArea->musicParam
-               && destParam2 == gCurrentArea->musicParam2;
-
-    if (get_current_background_music() != destParam2) {
-        unchanged = FALSE;
-    }
-    return unchanged;
-
-#endif
 }
 
 /**
@@ -960,8 +941,7 @@ void update_hud_values(void) {
         if (gMarioState->numLives > 100) {
             gMarioState->numLives = 100;
         }
-
-#if BUGFIX_MAX_LIVES
+		
         if (gMarioState->numCoins > 999) {
             gMarioState->numCoins = 999;
         }
@@ -969,12 +949,7 @@ void update_hud_values(void) {
         if (gHudDisplay.coins > 999) {
             gHudDisplay.coins = 999;
         }
-#else
-        if (gMarioState->numCoins > 999) {
-            gMarioState->numLives = (s8) 999; //! Wrong variable
-        }
-#endif
-
+		
         gHudDisplay.stars = gMarioState->numStars;
         gHudDisplay.lives = gMarioState->numLives;
         gHudDisplay.keys = gMarioState->numKeys;
@@ -1326,11 +1301,7 @@ s32 lvl_init_from_save_file(UNUSED s16 arg0, s32 levelNum) {
 #endif
     sWarpDest.type = WARP_TYPE_NOT_WARPING;
     sDelayedWarpOp = WARP_OP_NONE;
-#ifdef CASTLE_MUSIC_FIX
     gNeverEnteredCastle = 0;
-#else
-    gNeverEnteredCastle = !save_file_exists(gCurrSaveFileNum - 1);
-#endif
     gCurrLevelNum = levelNum;
     gCurrCourseNum = COURSE_NONE;
     gSavedCourseNum = COURSE_NONE;

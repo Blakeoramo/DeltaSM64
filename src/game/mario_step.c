@@ -73,7 +73,7 @@ void transfer_bully_speed(struct BullyCollisionData *obj1, struct BullyCollision
     //! Bully battery
 }
 
-void init_bully_collision_data(struct BullyCollisionData *data, f32 posX, f32 posZ,
+BAD_RETURN(s32) init_bully_collision_data(struct BullyCollisionData *data, f32 posX, f32 posZ,
                                f32 forwardVel, s16 yaw, f32 conversionRatio, f32 radius) {
     if (forwardVel < 0.0f) {
         forwardVel *= -1.0f;
@@ -258,26 +258,23 @@ s32 stationary_ground_step(struct MarioState *m) {
 }
 
 static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
-    struct WallCollisionData lowerWall;
-    struct WallCollisionData upperWall;
+    UNUSED struct Surface *lowerWall;
+    struct Surface *upperWall;
     struct Surface *ceil;
     struct Surface *floor;
     f32 ceilHeight;
     f32 floorHeight;
     f32 waterLevel;
 
-    s16 i;
-    s16 wallDYaw;
-    s32 oldWallDYaw;
-    s32 absWallDYaw;
-
-    resolve_and_return_wall_collisions(nextPos, 30.0f, 24.0f, &lowerWall);
-    resolve_and_return_wall_collisions(nextPos, 60.0f, 50.0f, &upperWall);
+    lowerWall = resolve_and_return_wall_collisions(nextPos, 30.0f, 24.0f);
+    upperWall = resolve_and_return_wall_collisions(nextPos, 60.0f, 50.0f);
 
     floorHeight = find_floor(nextPos[0], nextPos[1], nextPos[2], &floor);
-    ceilHeight = find_ceil(nextPos[0], nextPos[1] + 3.0f, nextPos[2], &ceil);
+    ceilHeight = vec3f_find_ceil(nextPos, nextPos[1], &ceil);
 
     waterLevel = find_water_level(nextPos[0], nextPos[2]);
+
+    m->wall = upperWall;
 
     if (floor == NULL) {
         return GROUND_STEP_HIT_WALL_STOP_QSTEPS;
@@ -308,25 +305,14 @@ static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
     m->floor = floor;
     m->floorHeight = floorHeight;
 
-    if (m->wall != NULL) {
-        oldWallDYaw = atan2s(m->wall->normal.z, m->wall->normal.x) - m->faceAngle[1];
-        oldWallDYaw = oldWallDYaw < 0 ? -oldWallDYaw : oldWallDYaw;
-    } else {
-        oldWallDYaw = 0;
-    }
-    for (i = 0; i < upperWall.numWalls; i++) {
-        wallDYaw = atan2s(upperWall.walls[i]->normal.z, upperWall.walls[i]->normal.x) - m->faceAngle[1];
-        absWallDYaw = wallDYaw < 0 ? -wallDYaw : wallDYaw;
-        if (absWallDYaw > oldWallDYaw) {
-            oldWallDYaw = absWallDYaw;
-            m->wall = upperWall.walls[i];
-        }
+    if (upperWall != NULL) {
+        s16 wallDYaw = atan2s(upperWall->normal.z, upperWall->normal.x) - m->faceAngle[1];
 
         if (wallDYaw >= 0x2AAA && wallDYaw <= 0x5555) {
-            continue;
+            return GROUND_STEP_NONE;
         }
         if (wallDYaw <= -0x2AAA && wallDYaw >= -0x5555) {
-            continue;
+            return GROUND_STEP_NONE;
         }
 
         return GROUND_STEP_HIT_WALL_CONTINUE_QSTEPS;
@@ -339,8 +325,6 @@ s32 perform_ground_step(struct MarioState *m) {
     s32 i;
     u32 stepResult;
     Vec3f intendedPos;
-
-    m->wall = NULL;
 
     for (i = 0; i < 4; i++) {
         intendedPos[0] = m->pos[0] + m->floor->normal.y * (m->vel[0] / 4.0f);
@@ -363,7 +347,9 @@ s32 perform_ground_step(struct MarioState *m) {
     return stepResult;
 }
 
-struct Surface *check_ledge_grab(struct MarioState *m, struct Surface *grabbedWall, struct Surface *wall, Vec3f intendedPos, Vec3f nextPos, Vec3f ledgePos, struct Surface **ledgeFloor) {
+u32 check_ledge_grab(struct MarioState *m, struct Surface *wall, Vec3f intendedPos, Vec3f nextPos) {
+    struct Surface *ledgeFloor;
+    Vec3f ledgePos;
     f32 displacementX;
     f32 displacementZ;
 
@@ -371,99 +357,54 @@ struct Surface *check_ledge_grab(struct MarioState *m, struct Surface *grabbedWa
         return FALSE;
     }
 
-    // Return the already grabbed wall if Mario is moving into it more than the newly tested wall
-    if (grabbedWall != NULL &&
-        grabbedWall->normal.x * m->vel[0] + grabbedWall->normal.z * m->vel[2] < wall->normal.x * m->vel[0] + wall->normal.z * m->vel[2])
-        return grabbedWall;
-
     displacementX = nextPos[0] - intendedPos[0];
     displacementZ = nextPos[2] - intendedPos[2];
 
     // Only ledge grab if the wall displaced Mario in the opposite direction of
     // his velocity.
     if (displacementX * m->vel[0] + displacementZ * m->vel[2] > 0.0f) {
-        return grabbedWall;
+        return FALSE;
     }
 
     //! Since the search for floors starts at y + 160, we will sometimes grab
     // a higher ledge than expected (glitchy ledge grab)
     ledgePos[0] = nextPos[0] - wall->normal.x * 60.0f;
     ledgePos[2] = nextPos[2] - wall->normal.z * 60.0f;
-    ledgePos[1] = find_floor(ledgePos[0], nextPos[1] + 160.0f, ledgePos[2], ledgeFloor);
+    ledgePos[1] = find_floor(ledgePos[0], nextPos[1] + 160.0f, ledgePos[2], &ledgeFloor);
 
     if (ledgePos[1] - nextPos[1] <= 100.0f) {
-        return grabbedWall;
+        return FALSE;
     }
-    return wall;
-}
 
-s32 bonk_or_hit_lava_wall(struct MarioState *m, struct WallCollisionData *wallData) {
-    s16 i;
-    s16 wallDYaw;
-    s32 oldWallDYaw;
-    s32 absWallDYaw;
-    s32 result;
-    result = AIR_STEP_NONE;
+    vec3f_copy(m->pos, ledgePos);
+    m->floor = ledgeFloor;
+    m->floorHeight = ledgePos[1];
 
-    if (m->wall != NULL) {
-        oldWallDYaw = atan2s(m->wall->normal.z, m->wall->normal.x) - m->faceAngle[1];
-        oldWallDYaw = oldWallDYaw < 0 ? -oldWallDYaw : oldWallDYaw;
-    }
-    else
-        oldWallDYaw = 0;
+    m->floorAngle = atan2s(ledgeFloor->normal.z, ledgeFloor->normal.x);
 
-    for (i = 0; i < wallData->numWalls; i++) {
-        if (wallData->walls[i] != NULL) {
-            wallDYaw = atan2s(wallData->walls[i]->normal.z, wallData->walls[i]->normal.x) - m->faceAngle[1];
-            if (wallData->walls[i]->type == SURFACE_BURNING) {
-                m->wall = wallData->walls[i];
-                return AIR_STEP_HIT_LAVA_WALL;
-            }
-
-            //Update wall reference (bonked wall) only if the new wall has a better facing angle
-            absWallDYaw = wallDYaw < 0 ? -wallDYaw : wallDYaw;
-            if (absWallDYaw > oldWallDYaw) {
-                oldWallDYaw = absWallDYaw;
-                m->wall = wallData->walls[i];
-
-                if (wallDYaw < -0x6000 || wallDYaw > 0x6000) {
-                    m->flags |= MARIO_UNKNOWN_30;
-                    result = AIR_STEP_HIT_WALL;
-                }
-            }
-
-
-        }
-    }
-    return result;
+    m->faceAngle[0] = 0;
+    m->faceAngle[1] = atan2s(wall->normal.z, wall->normal.x) + 0x8000;
+    return TRUE;
 }
 
 s32 perform_air_quarter_step(struct MarioState *m, Vec3f intendedPos, u32 stepArg) {
-    s16 i;
-    s32 stepResult;
-
+    s16 wallDYaw;
     Vec3f nextPos;
-    Vec3f ledgePos;
-    struct WallCollisionData upperWall;
-    struct WallCollisionData lowerWall;
+    struct Surface *upperWall;
+    struct Surface *lowerWall;
     struct Surface *ceil;
     struct Surface *floor;
-    struct Surface *grabbedWall;
-    struct Surface *ledgeFloor;
     f32 ceilHeight;
     f32 floorHeight;
     f32 waterLevel;
 
-    grabbedWall = NULL;
-    stepResult = AIR_STEP_NONE;
-
     vec3f_copy(nextPos, intendedPos);
 
-    resolve_and_return_wall_collisions(nextPos, 150.0f, 50.0f, &upperWall);
-    resolve_and_return_wall_collisions(nextPos, 30.0f, 50.0f, &lowerWall);
+    upperWall = resolve_and_return_wall_collisions(nextPos, 150.0f, 50.0f);
+    lowerWall = resolve_and_return_wall_collisions(nextPos, 30.0f, 50.0f);
 
     floorHeight = find_floor(nextPos[0], nextPos[1], nextPos[2], &floor);
-    ceilHeight = find_ceil(nextPos[0], nextPos[1] + 3.0f, nextPos[2], &ceil);
+    ceilHeight = vec3f_find_ceil(nextPos, nextPos[1], &ceil);
 
     waterLevel = find_water_level(nextPos[0], nextPos[2]);
 
@@ -528,44 +469,40 @@ s32 perform_air_quarter_step(struct MarioState *m, Vec3f intendedPos, u32 stepAr
         }
 
         m->pos[1] = nextPos[1];
-        return AIR_STEP_HIT_CEILING;
+        return AIR_STEP_HIT_WALL;
     }
 
     //! When the wall is not completely vertical or there is a slight wall
     // misalignment, you can activate these conditions in unexpected situations
-
-    if ((stepArg & AIR_STEP_CHECK_LEDGE_GRAB) && upperWall.numWalls == 0) {
-        for (i = 0; i < lowerWall.numWalls; i++)
-            if ((grabbedWall = check_ledge_grab(m, grabbedWall, lowerWall.walls[i], intendedPos, nextPos, ledgePos, &ledgeFloor)))
-                stepResult = AIR_STEP_GRABBED_LEDGE;
-        if (stepResult == AIR_STEP_GRABBED_LEDGE)
-        {
-            vec3f_copy(m->pos, ledgePos);
-            m->floor = ledgeFloor;
-            m->floorHeight = ledgePos[1];
-
-            m->floorAngle = atan2s(ledgeFloor->normal.z, ledgeFloor->normal.x);
-
-            m->faceAngle[0] = 0;
-            m->faceAngle[1] = atan2s(grabbedWall->normal.z, grabbedWall->normal.x) + 0x8000;
+    if ((stepArg & AIR_STEP_CHECK_LEDGE_GRAB) && upperWall == NULL && lowerWall != NULL) {
+        if (check_ledge_grab(m, lowerWall, intendedPos, nextPos)) {
+            return AIR_STEP_GRABBED_LEDGE;
         }
-        else {
-            vec3f_copy(m->pos, nextPos);
-            m->floor = floor;
-            m->floorHeight = floorHeight;
-        }
-        return stepResult;
+
+        vec3f_copy(m->pos, nextPos);
+        m->floor = floor;
+        m->floorHeight = floorHeight;
+        return AIR_STEP_NONE;
     }
 
     vec3f_copy(m->pos, nextPos);
     m->floor = floor;
     m->floorHeight = floorHeight;
 
-    stepResult = bonk_or_hit_lava_wall(m, &upperWall);
-    if (stepResult != AIR_STEP_NONE)
-        return stepResult;
+    if (upperWall != NULL || lowerWall != NULL) {
+        m->wall = upperWall != NULL ? upperWall : lowerWall;
+        wallDYaw = atan2s(m->wall->normal.z, m->wall->normal.x) - m->faceAngle[1];
 
-    return bonk_or_hit_lava_wall(m, &lowerWall);
+        if (m->wall->type == SURFACE_BURNING) {
+            return AIR_STEP_HIT_LAVA_WALL;
+        }
+        if (wallDYaw < -0x5F00 || wallDYaw > 0x5700) {
+            m->flags |= MARIO_UNKNOWN_30;
+            return AIR_STEP_HIT_WALL;
+        }
+    }
+
+    return AIR_STEP_NONE;
 }
 
 void apply_twirl_gravity(struct MarioState *m) {
@@ -609,7 +546,7 @@ void apply_gravity(struct MarioState *m) {
             m->vel[1] = -75.0f;
         }
     } else if (m->action == ACT_LONG_JUMP || m->action == ACT_SLIDE_KICK
-        || m->action == ACT_BBH_ENTER_SPIN) {
+               || m->action == ACT_BBH_ENTER_SPIN) {
         m->vel[1] -= 2.0f;
         if (m->vel[1] < -75.0f) {
             m->vel[1] = -75.0f;
@@ -676,9 +613,7 @@ void apply_vertical_wind(struct MarioState *m) {
 }
 
 s32 perform_air_step(struct MarioState *m, u32 stepArg) {
-    // s16 wallDYaw;
     Vec3f intendedPos;
-    const f32 numSteps = 4.0f; /* max(4.0f, (s32)(sqrtf(m->vel[0] * m->vel[0] + m->vel[1] * m->vel[1] + m->vel[2] * m->vel[2]) / 50.0f));*/
     s32 i;
     s32 quarterStepResult;
     s32 stepResult = AIR_STEP_NONE;
@@ -686,11 +621,15 @@ s32 perform_air_step(struct MarioState *m, u32 stepArg) {
     m->wall = NULL;
 
     for (i = 0; i < 4; i++) {
-        intendedPos[0] = m->pos[0] + m->vel[0] / numSteps;
-        intendedPos[1] = m->pos[1] + m->vel[1] / numSteps;
-        intendedPos[2] = m->pos[2] + m->vel[2] / numSteps;
+        intendedPos[0] = m->pos[0] + m->vel[0] / 4.0f;
+        intendedPos[1] = m->pos[1] + m->vel[1] / 4.0f;
+        intendedPos[2] = m->pos[2] + m->vel[2] / 4.0f;
 
         quarterStepResult = perform_air_quarter_step(m, intendedPos, stepArg);
+
+        //! On one qf, hit OOB/ceil/wall to store the 2 return value, and continue
+        // getting 0s until your last qf. Graze a wall on your last qf, and it will
+        // return the stored 2 with a sharply angled reference wall. (some gwks)
 
         if (quarterStepResult != AIR_STEP_NONE) {
             stepResult = quarterStepResult;
@@ -716,15 +655,6 @@ s32 perform_air_step(struct MarioState *m, u32 stepArg) {
 
     vec3f_copy(m->marioObj->header.gfx.pos, m->pos);
     vec3s_set(m->marioObj->header.gfx.angle, 0, m->faceAngle[1], 0);
-
-    /*if (stepResult == AIR_STEP_HIT_WALL && m->wall != NULL) {
-            wallDYaw = atan2s(m->wall->normal.z, m->wall->normal.x) - m->faceAngle[1];
-            if ((stepArg & AIR_STEP_CHECK_BONK) && (wallDYaw < -0x6000 || wallDYaw > 0x6000))
-            {
-                if (m->forwardVel > 16.0f)
-                    mario_bonk_reflection(m, (stepArg & AIR_STEP_BONK_NEGATE_SPEED), m->wall);
-            }
-    }*/
 
     return stepResult;
 }

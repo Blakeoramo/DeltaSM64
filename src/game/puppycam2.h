@@ -28,9 +28,6 @@
 #define PUPPYSPLINE_NONE 1 //Will not write to focus at all.
 #define PUPPYSPLINE_FOLLOW 2 //Focus will follow a separate spline, but will mirror the speed and progress of the pos.
 
-#define PUPPYDEBUG_LOCK_CONTROLS 0x1
-#define PUPPYDEBUG_TRACK_MARIO   0x2
-
 #include "include/command_macros_base.h"
 
 #define PUPPYVOLUME(x, y, z, length, height, width, yaw, functionptr, anglesptr, addflags, removeflags, flagpersistance, room, shape) \
@@ -93,7 +90,6 @@ struct gPuppyStruct
     s16 targetDist[2]; //Used with secondary view targets to smooth out the between status.
     s16 intendedTerrainPitch; //The pitch that the game wants the game to tilt towards, following the terrain.
     s16 terrainPitch; //The pitch the game tilts towards, when following terrain inclines.
-    u8 debugFlags; //Behaviour flags during free view.
 
     u8 cutscene; //A boolean that decides whether a cutscene is active
     s32 (*sceneFunc)();

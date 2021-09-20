@@ -130,6 +130,10 @@ static void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surfac
     } else {
         listIndex = SPATIAL_PARTITION_WALLS;
         sortDir = 0; // insertion order
+
+        if (surface->normal.x < -0.707 || surface->normal.x > 0.707) {
+            surface->flags |= SURFACE_FLAG_X_PROJECTION;
+        }
     }
 
     //! (Surface Cucking) Surfaces are sorted by the height of their first
@@ -377,32 +381,6 @@ static struct Surface *read_surface_data(TerrainData *vertexData, TerrainData **
     return surface;
 }
 
-#ifndef ALL_SURFACES_HAVE_FORCE
-/**
- * Returns whether a surface has exertion/moves Mario
- * based on the surface type.
- */
-static s32 surface_has_force(s32 surfaceType) {
-    s32 hasForce = FALSE;
-
-    switch (surfaceType) {
-        case SURFACE_0004: // Unused
-        case SURFACE_FLOWING_WATER:
-        case SURFACE_DEEP_MOVING_QUICKSAND:
-        case SURFACE_SHALLOW_MOVING_QUICKSAND:
-        case SURFACE_MOVING_QUICKSAND:
-        case SURFACE_HORIZONTAL_WIND:
-        case SURFACE_INSTANT_MOVING_QUICKSAND:
-            hasForce = TRUE;
-            break;
-
-        default:
-            break;
-    }
-    return hasForce;
-}
-#endif
-
 /**
  * Returns whether a surface should have the
  * SURFACE_FLAG_NO_CAM_COLLISION flag.
@@ -434,9 +412,6 @@ static void load_static_surfaces(TerrainData **data, TerrainData *vertexData, s3
     s32 numSurfaces;
     struct Surface *surface;
     s32 room = 0;
-#ifndef ALL_SURFACES_HAVE_FORCE
-    s16 hasForce = surface_has_force(surfaceType);
-#endif
     s32 flags = surf_has_no_cam_collision(surfaceType);
 
     numSurfaces = *(*data);
@@ -453,28 +428,10 @@ static void load_static_surfaces(TerrainData **data, TerrainData *vertexData, s3
             surface->room = room;
             surface->type = surfaceType;
             surface->flags = (s8) flags;
-
-#ifdef ALL_SURFACES_HAVE_FORCE
             surface->force = *(*data + 3);
-#else
-            if (hasForce) {
-                surface->force = *(*data + 3);
-            } else {
-                surface->force = 0;
-            }
-#endif
-
             add_surface(surface, FALSE);
         }
-
-#ifdef ALL_SURFACES_HAVE_FORCE
         *data += 4;
-#else
-        *data += 3;
-        if (hasForce) {
-            *data += 1;
-        }
-#endif
     }
 }
 
@@ -547,9 +504,6 @@ u32 get_area_terrain_size(TerrainData *data) {
     s32 numVertices;
     s32 numRegions;
     s32 numSurfaces;
-#ifndef ALL_SURFACES_HAVE_FORCE
-    TerrainData hasForce;
-#endif
 
     while (!end) {
         terrainLoadType = *data++;
@@ -578,12 +532,7 @@ u32 get_area_terrain_size(TerrainData *data) {
 
             default:
                 numSurfaces = *data++;
-#ifdef ALL_SURFACES_HAVE_FORCE
                 data += 4 * numSurfaces;
-#else
-                hasForce = surface_has_force(terrainLoadType);
-                data += (3 + hasForce) * numSurfaces;
-#endif
                 break;
         }
     }
@@ -714,9 +663,6 @@ void load_object_surfaces(TerrainData **data, TerrainData *vertexData) {
     s32 surfaceType;
     s32 i;
     s32 numSurfaces;
-#ifndef ALL_SURFACES_HAVE_FORCE
-    TerrainData hasForce;
-#endif
     s32 flags;
     s32 room;
 
@@ -725,10 +671,6 @@ void load_object_surfaces(TerrainData **data, TerrainData *vertexData) {
 
     numSurfaces = *(*data);
     (*data)++;
-
-#ifndef ALL_SURFACES_HAVE_FORCE
-    hasForce = surface_has_force(surfaceType);
-#endif
 
     flags = surf_has_no_cam_collision(surfaceType);
     flags |= SURFACE_FLAG_DYNAMIC;
@@ -747,31 +689,12 @@ void load_object_surfaces(TerrainData **data, TerrainData *vertexData) {
         if (surface != NULL) {
             surface->object = gCurrentObject;
             surface->type = surfaceType;
-
-#ifdef ALL_SURFACES_HAVE_FORCE
             surface->force = *(*data + 3);
-#else
-            if (hasForce) {
-                surface->force = *(*data + 3);
-            } else {
-                surface->force = 0;
-            }
-#endif
-
             surface->flags |= flags;
             surface->room = (s8) room;
             add_surface(surface, TRUE);
         }
-
-#ifdef ALL_SURFACES_HAVE_FORCE
         *data += 4;
-#else
-        if (hasForce) {
-            *data += 4;
-        } else {
-            *data += 3;
-        }
-#endif
     }
 }
 

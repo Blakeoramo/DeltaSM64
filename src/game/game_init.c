@@ -372,10 +372,10 @@ void draw_reset_bars(void) {
 void render_init(void) {
     if (IO_READ(DPC_PIPEBUSY_REG) == 0) {
         gIsConsole = 0;
-        gBorderHeight = BORDER_HEIGHT_EMULATOR;
+        gBorderHeight = 0;
     } else {
         gIsConsole = 1;
-        gBorderHeight = BORDER_HEIGHT_CONSOLE;
+        gBorderHeight = 0;
     }
     gGfxPool = &gGfxPools[0];
     set_segment_base_addr(1, gGfxPool->buffer);
@@ -418,7 +418,7 @@ void display_and_vsync(void) {
     if (IO_READ(DPC_PIPEBUSY_REG) && gIsConsole != 1)
     {
         gIsConsole = 1;
-        gBorderHeight = BORDER_HEIGHT_CONSOLE;
+        gBorderHeight = 0;
     }
     profiler_log_thread5_time(BEFORE_DISPLAY_LISTS);
     //gIsConsole = (IO_READ(DPC_PIPEBUSY_REG));
@@ -577,13 +577,12 @@ void run_demo_inputs(void) {
 /**
  * Update the controller struct with available inputs if present.
  */
-void read_controller_inputs(s32 threadID) {
+void read_controller_inputs(void) {
     s32 i;
 
     // If any controllers are plugged in, update the controller information.
     if (gControllerBits) {
-        if (threadID == 5)
-            osRecvMesg(&gSIEventMesgQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+        osRecvMesg(&gSIEventMesgQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
         osContGetReadData(&gControllerPads[0]);
 #if ENABLE_RUMBLE
         release_rumble_pak_control();
@@ -766,7 +765,7 @@ void thread5_game_loop(UNUSED void *arg) {
 
         audio_game_loop_tick();
         select_gfx_pool();
-        read_controller_inputs(5);
+        read_controller_inputs();
         addr = level_script_execute(addr);
         #if PUPPYPRINT_DEBUG == 0 && defined(VISUAL_DEBUG)
         debug_box_input();
