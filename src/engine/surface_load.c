@@ -697,8 +697,6 @@ void load_object_surfaces(TerrainData **data, TerrainData *vertexData) {
         *data += 4;
     }
 }
-
-#ifdef AUTO_COLLISION_DISTANCE
 // From Kaze
 static void get_optimal_coll_dist(struct Object *o) {
     register f32 thisVertDist, maxDist = 0.0f;
@@ -720,7 +718,6 @@ static void get_optimal_coll_dist(struct Object *o) {
     }
     o->oCollisionDistance = (sqrtf(maxDist) + 100.0f);
 }
-#endif
 
 /**
  * Transform an object's vertices, reload them, and render the object.
@@ -740,11 +737,9 @@ void load_object_collision_model(void) {
         marioDist = dist_between_objects(gCurrentObject, gMarioObject);
     }
 
-#ifdef AUTO_COLLISION_DISTANCE
     if (!(gCurrentObject->oFlags & OBJ_FLAG_DONT_CALC_COLL_DIST)) {
         get_optimal_coll_dist(gCurrentObject);
     }
-#endif
 
     // If the object collision is supposed to be loaded more than the
     // drawing distance, extend the drawing range.

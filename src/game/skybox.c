@@ -1,6 +1,7 @@
 #include <PR/ultratypes.h>
 
 #include "area.h"
+#include "game_init.h"
 #include "engine/math_util.h"
 #include "geo_misc.h"
 #include "gfx_dimensions.h"
@@ -98,22 +99,22 @@ u8 sSkyboxColors[][3] = {
 /**
  * Constant used to scale the skybox horizontally to a multiple of the screen's width
  */
-#define SKYBOX_WIDTH (4 * SCREEN_WIDTH)
+#define SKYBOX_WIDTH (4 * gScreenWidth)
 /**
  * Constant used to scale the skybox vertically to a multiple of the screen's height
  */
-#define SKYBOX_HEIGHT (4 * SCREEN_HEIGHT)
+#define SKYBOX_HEIGHT (4 * gScreenHeight)
 
 /**
  * The tile's width in world space.
  * By default, two full tiles can fit in the screen.
  */
-#define SKYBOX_TILE_WIDTH (SCREEN_WIDTH / (2 * SKYBOX_SIZE))
+#define SKYBOX_TILE_WIDTH (gScreenWidth / (2 * SKYBOX_SIZE))
 /**
  * The tile's height in world space.
  * By default, two full tiles can fit in the screen.
  */
-#define SKYBOX_TILE_HEIGHT (SCREEN_HEIGHT / (2 * SKYBOX_SIZE))
+#define SKYBOX_TILE_HEIGHT (gScreenHeight / (2 * SKYBOX_SIZE))
 
 /**
  * The horizontal length of the skybox tilemap in tiles.
@@ -130,7 +131,7 @@ u8 sSkyboxColors[][3] = {
  *
  * fov is always 90 degrees, set in draw_skybox_facing_camera.
  *
- * The calculation performed is equivalent to (360 / fov) * (yaw / 65536) * SCREEN_WIDTH
+ * The calculation performed is equivalent to (360 / fov) * (yaw / 65536) * gScreenWidth
  * in other words: (the number of fov-sized parts of the circle there are) *
  *                 (how far is the camera rotated from 0, scaled 0 to 1)   *
  *                 (the screen width)
@@ -139,7 +140,7 @@ s32 calculate_skybox_scaled_x(s8 player, f32 fov) {
     f32 yaw = sSkyBoxInfo[player].yaw;
 
     //! double literals are used instead of floats
-    f32 yawScaled = SCREEN_WIDTH * 360.0 * yaw / (fov * 65536.0);
+    f32 yawScaled = gScreenWidth * 360.0 * yaw / (fov * 65536.0);
     // Round the scaled yaw. Since yaw is a u16, it doesn't need to check for < 0
     s32 scaledX = yawScaled + 0.5;
 
@@ -170,8 +171,8 @@ s32 calculate_skybox_scaled_y(s8 player, UNUSED f32 fov) {
     if (scaledY > SKYBOX_HEIGHT) {
         scaledY = SKYBOX_HEIGHT;
     }
-    if (scaledY < SCREEN_HEIGHT) {
-        scaledY = SCREEN_HEIGHT;
+    if (scaledY < gScreenHeight) {
+        scaledY = gScreenHeight;
     }
     return scaledY;
 }
@@ -237,15 +238,15 @@ void draw_skybox_tile_grid(Gfx **dlist, s8 background, s8 player, s8 colorIndex)
 
 void *create_skybox_ortho_matrix(s8 player) {
     f32 left = sSkyBoxInfo[player].scaledX;
-    f32 right = sSkyBoxInfo[player].scaledX + SCREEN_WIDTH;
-    f32 bottom = sSkyBoxInfo[player].scaledY - SCREEN_HEIGHT;
+    f32 right = sSkyBoxInfo[player].scaledX + gScreenWidth;
+    f32 bottom = sSkyBoxInfo[player].scaledY - gScreenHeight;
     f32 top = sSkyBoxInfo[player].scaledY;
     Mtx *mtx = alloc_display_list(sizeof(*mtx));
 
 #ifdef WIDESCREEN
-    f32 half_width = (4.0f / 3.0f) / GFX_DIMENSIONS_ASPECT_RATIO * SCREEN_WIDTH / 2;
-    f32 center = (sSkyBoxInfo[player].scaledX + SCREEN_WIDTH / 2);
-    if (half_width < SCREEN_WIDTH / 2) {
+    f32 half_width = (4.0f / 3.0f) / GFX_DIMENSIONS_ASPECT_RATIO * gScreenWidth / 2;
+    f32 center = (sSkyBoxInfo[player].scaledX + gScreenWidth / 2);
+    if (half_width < gScreenWidth / 2) {
         // A wider screen than 4:3
         left = center - half_width;
         right = center + half_width;

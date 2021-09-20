@@ -405,25 +405,16 @@ void puppycam_check_save(void)
 void puppycam_get_save(void)
 {
     gPuppyCam.options = gSaveBuffer.menuData[0].saveOptions;
-
     gSaveBuffer.menuData[0].firstBoot = gSaveBuffer.menuData[0].firstBoot;
-    #ifdef WIDE
     gConfig.widescreen = save_file_get_widescreen_mode();
-    #endif
-
     puppycam_check_save();
 }
 
 void puppycam_set_save(void)
 {
     gSaveBuffer.menuData[0].saveOptions = gPuppyCam.options;
-
     gSaveBuffer.menuData[0].firstBoot = 4;
-
-    #ifdef WIDE
     save_file_set_widescreen_mode(gConfig.widescreen);
-    #endif
-
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
 }
@@ -668,7 +659,6 @@ void save_file_set_sound_mode(u16 mode) {
     save_main_menu_data();
 }
 
-#ifdef WIDE
 u8 save_file_get_widescreen_mode(void) {
     return gSaveBuffer.menuData[0].wideMode;
 }
@@ -679,7 +669,6 @@ void save_file_set_widescreen_mode(u8 mode) {
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
 }
-#endif
 
 u16 save_file_get_sound_mode(void) {
     return gSaveBuffer.menuData[0].soundMode;

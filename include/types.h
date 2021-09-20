@@ -22,9 +22,7 @@
 struct Config
 {
     f32 audioFrequency;
-#ifdef WIDE
     s16 widescreen;
-#endif
     u8 tvType;
 };
 

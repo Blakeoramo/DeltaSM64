@@ -34,7 +34,7 @@ u16 gDialogTextAlpha;
 s16 gCutsceneMsgXOffset;
 s16 gCutsceneMsgYOffset;
 s8 gRedCoinsCollected;
-#if defined(WIDE) && !defined(PUPPYCAM)
+#if !defined(PUPPYCAM)
 u8 textCurrRatio43[] = { TEXT_HUD_CURRENT_RATIO_43 };
 u8 textCurrRatio169[] = { TEXT_HUD_CURRENT_RATIO_169 };
 u8 textPressL[] = { TEXT_HUD_PRESS_L };
@@ -210,7 +210,7 @@ void create_dl_ortho_matrix(void) {
 
     create_dl_identity_matrix();
 
-    guOrtho(matrix, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -10.0f, 10.0f, 1.0f);
+    guOrtho(matrix, 0.0f, gScreenWidth, 0.0f, gScreenHeight, -10.0f, 10.0f, 1.0f);
 
     // Should produce G_RDPHALF_1 in Fast3D
     gSPPerspNormalize(gDisplayListHead++, 0xFFFF);
@@ -1263,7 +1263,7 @@ void render_dialog_entries(void) {
 #endif
                   ensure_nonnegative(DIAG_VAL2 - dialog->width),
 #ifdef WIDESCREEN
-                  SCREEN_WIDTH,
+                  gScreenWidth,
 #else
                   ensure_nonnegative(DIAG_VAL3 + dialog->leftOffset),
 #endif
@@ -1273,7 +1273,7 @@ void render_dialog_entries(void) {
     if (gLastDialogPageStrPos == -1 && gLastDialogResponse == 1) {
         render_dialog_triangle_choice();
     }
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 2, 2, SCREEN_WIDTH - gBorderHeight/2, SCREEN_HEIGHT - gBorderHeight/2);
+    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 2, 2, gScreenWidth - gBorderHeight/2, gScreenHeight - gBorderHeight/2);
     if (gLastDialogPageStrPos != -1 && gDialogBoxState == DIALOG_STATE_VERTICAL) {
         render_dialog_string_color(dialog->linesPerBox);
     }
@@ -1507,7 +1507,7 @@ void change_dialog_camera_angle(void) {
 }
 
 void shade_screen(void) {
-    create_dl_translation_matrix(MENU_MTX_PUSH, GFX_DIMENSIONS_FROM_LEFT_EDGE(0), SCREEN_HEIGHT, 0);
+    create_dl_translation_matrix(MENU_MTX_PUSH, GFX_DIMENSIONS_FROM_LEFT_EDGE(0), gScreenHeight, 0);
 
     // This is a bit weird. It reuses the dialog text box (width 130, height -80),
     // so scale to at least fit the screen.
@@ -1515,7 +1515,7 @@ void shade_screen(void) {
     create_dl_scale_matrix(MENU_MTX_NOPUSH, 2.6f, 3.4f, 1.0f);
 #else
     create_dl_scale_matrix(MENU_MTX_NOPUSH,
-                           GFX_DIMENSIONS_ASPECT_RATIO * SCREEN_HEIGHT / 130.0f, 3.0f, 1.0f);
+                           GFX_DIMENSIONS_ASPECT_RATIO * gScreenHeight / 130.0f, 3.0f, 1.0f);
 #endif
 
     gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, 110);
@@ -1558,7 +1558,7 @@ void render_pause_red_coins(void) {
 }
 ///By default, not needed as puppycamera has an option, but should you wish to revert that, you are legally allowed.
 
-#if defined(WIDE) && !defined(PUPPYCAM)
+#if !defined(PUPPYCAM)
 void render_widescreen_setting(void) {
     //gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
    // gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, gDialogTextAlpha);
@@ -1933,7 +1933,7 @@ s16 render_pause_courses_and_castle(void) {
             }
             break;
     }
-    #if defined(WIDE) && !defined(PUPPYCAM)
+    #if !defined(PUPPYCAM)
         render_widescreen_setting();
     #endif
     if (gDialogTextAlpha < 250) {

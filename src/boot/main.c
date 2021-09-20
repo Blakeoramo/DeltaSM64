@@ -517,7 +517,7 @@ void thread1_idle(UNUSED void *arg) {
 		break;
 	}
 	get_audio_frequency();
-    change_vi(&VI, SCREEN_WIDTH, SCREEN_HEIGHT);
+    //change_vi(&VI, gScreenWidth, gScreenHeight);
     osViSetMode(&VI);
     osViBlack(TRUE);
     osViSetSpecialFeatures(OS_VI_DITHER_FILTER_ON);

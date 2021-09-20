@@ -8,6 +8,7 @@
 
 #include "types.h"
 #include "memory.h"
+#include "../src/buffers/framebuffers.h"
 
 #define GFX_POOL_SIZE 10000 // Size of how large the master display list (gDisplayListHead) can be
 
@@ -47,6 +48,8 @@ extern u8 *gGfxPoolEnd;
 extern struct GfxPool *gGfxPool;
 extern u8 gControllerBits;
 extern u8 gIsConsole;
+extern u16 gScreenWidth;
+extern u16 gScreenHeight;
 extern u8 gBorderHeight;
 #ifdef CUSTOM_DEBUG
 extern u8 gCustomDebugMode;

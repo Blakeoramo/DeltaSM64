@@ -346,7 +346,7 @@ void print_console_log(void)
 {
     s32 i;
     prepare_blank_box();
-    render_blank_box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 96);
+    render_blank_box(0, 0, gScreenWidth, gScreenHeight, 0, 0, 0, 96);
     finish_blank_box();
     for (i = 0; i < LOG_BUFFER_SIZE; i++)
     {

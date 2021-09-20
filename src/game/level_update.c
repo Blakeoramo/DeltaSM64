@@ -1048,7 +1048,7 @@ s32 play_mode_paused(void) {
         if (gDebugLevelSelect) {
             fade_into_special_warp(-9, 1);
         } else {
-            initiate_warp(EXIT_COURSE_LEVEL, EXIT_COURSE_AREA, EXIT_COURSE_NODE, 0);
+            initiate_warp(LEVEL_CASTLE, 0x01, 0x1F, 0); //EXIT COURSE CODE
             fade_into_special_warp(0, 0);
             gSavedCourseNum = COURSE_NONE;
         }

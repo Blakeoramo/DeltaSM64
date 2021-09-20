@@ -84,9 +84,7 @@ static const struct gPCOptionStruct
 
 static const struct gPCOptionStruct gPCOptions[]=
 { //If the min and max are 0 and 1, then the value text is used, otherwise it's ignored.
-    #ifdef WIDE
     {/*Option Name*/ 7, /*Option Variable*/ &gConfig.widescreen,       /*Option Value Text Start*/ 0, /*Option Minimum*/ FALSE, /*Option Maximum*/ TRUE},
-    #endif
     #if MULTILANG
     {/*Option Name*/ 8, /*Option Variable*/ &gInGameLanguage,       /*Option Value Text Start*/ 4, /*Option Minimum*/ 1, /*Option Maximum*/ 3},
     #endif
@@ -393,7 +391,7 @@ void puppycam_display_options()
     }
 
     gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 80, SCREEN_WIDTH, SCREEN_HEIGHT);
+    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 80, gScreenWidth, gScreenHeight);
     for (i = 0; i < gPCOptionCap; i++)
     {
         scroll = 140-(32*i)+(gPCOptionScroll*32);
@@ -420,7 +418,7 @@ void puppycam_display_options()
         }
     }
     newcam_sinpos = sins(gGlobalTimer*5000)*4;
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
     gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 255);
     print_generic_string(80-newcam_sinpos, 132-(32*(gPCOptionSelected-gPCOptionScroll)),  (*gPCToggleStringsPtr)[3]);
     print_generic_string(232+newcam_sinpos, 132-(32*(gPCOptionSelected-gPCOptionScroll)),  (*gPCToggleStringsPtr)[4]);

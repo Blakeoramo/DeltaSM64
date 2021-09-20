@@ -8,29 +8,16 @@
 
 // Bug Fixes
 // --| Post-JP Version Nintendo Bug Fixes
-/// Fixes bug where Piranha Plants do not reset their action state when the
-/// player exits their activation radius.
-#define BUGFIX_PIRANHA_PLANT_STATE_RESET (0 || VERSION_US || VERSION_EU || VERSION_SH)
-/// Fixes bug where sleeping Piranha Plants damage players that bump into them
-#define BUGFIX_PIRANHA_PLANT_SLEEP_DAMAGE (0 || VERSION_US || VERSION_SH)
 /// Fixes bug where it shows a star when you grab a key in bowser battle stages
-#define BUGFIX_STAR_BOWSER_KEY (0 || VERSION_US || VERSION_EU || VERSION_SH)
-/// Fixes bug that enables Mario in time stop even if is not ready to speak
-#define BUGFIX_DIALOG_TIME_STOP (0 || VERSION_US || VERSION_EU || VERSION_SH)
-/// Fixes bug that causes Mario to still collide with Bowser in BITS after his defeat
-#define BUGFIX_BOWSER_COLLIDE_BITS_DEAD (0 || VERSION_US || VERSION_EU || VERSION_SH)
-/// Fixes bug where Bowser wouldn't reset his speed when fallen off (and adds missing checks)
-#define BUGFIX_BOWSER_FALLEN_OFF_STAGE (0 || VERSION_US || VERSION_EU || VERSION_SH)
-/// Fixes bug where Bowser would look weird while fading out
-#define BUGFIX_BOWSER_FADING_OUT (0 || VERSION_US || VERSION_EU || VERSION_SH)
+//#define BUGFIX_STAR_BOWSER_KEY (0 || VERSION_US || VERSION_EU || VERSION_SH)
 
 // Support Rumble Pak
 // Currently not recommended, as it may cause random crashes.
 //#define ENABLE_RUMBLE (1 || VERSION_SH)
 
 // Screen Size Defines
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+#define SCREEN_WIDTH 320 //Static
+#define SCREEN_HEIGHT 240 //Static
 
 // Border Height Define for NTSC Versions
 #ifdef TARGET_N64
@@ -81,8 +68,6 @@
 //#define MULTILANG (0 || VERSION_EU)
 // Enables Puppy Camera 2, a rewritten camera that can be freely configured and modified.
 //#define PUPPYCAM
-// Automatically calculate the optimal collision distance for an object based on its vertices.
-#define AUTO_COLLISION_DISTANCE
 
 
 // HACKER QOL
@@ -106,34 +91,20 @@
 #define UNLOCK_ALL
 
 // BUG/GAME QOL FIXES
-// Allow Mario to grab hangable ceilings from any state
-#define HANGING_FIX
 // The last frame that will be considered a firsty when wallkicking
 #define FIRSTY_LAST_FRAME 1
-// Disable BLJs and crush SimpleFlips's dreams
-//#define DISABLE_BLJ
 
 // RELATING TO EXIT COURSE
 // Disable exit course
 //#define DISABLE_EXIT_COURSE
 // Decides whether you can exit course while moving (has no effect if you disable exit course)
 //#define EXIT_COURSE_WHILE_MOVING
-// Decides which level "exit course" takes you to (has no effect if you disable exit course)
-#define EXIT_COURSE_LEVEL LEVEL_CASTLE
-// Decides the area node "exit course" takes you to (has no effect if you disable exit course)
-#define EXIT_COURSE_AREA 0x01
-// Decides the warp node "exit course" takes you to (has no effect if you disable exit course)
-#define EXIT_COURSE_NODE 0x1F
 
 // OTHER ENHANCEMENTS
-// Enable widescreen (16:9) support
-#define WIDE
 // Skybox size modifier, changing this will add support for larger skybox images. NOTE: Vanilla skyboxes may break if you change this option. Be sure to rescale them accordingly.
 // Whenever you change this, make sure to run "make -C tools clean" to rebuild the skybox tool (alternatively go into skyconv.c and change the file in any way (like adding/deleting a space) to specifically rebuild that tool).
 // When increasing this, you should probably also increase the GFX pool size. (the GFX_POOL_SIZE define in src/game/game_init.h)
 #define SKYBOX_SIZE 1
-// Disable AA (Recommended: it changes nothing on emulator, and it makes console run better)
-#define DISABLE_AA
 // Use a much better implementation of reverb over vanilla's fake echo reverb. Great for caves or eerie levels, as well as just a better audio experience in general.
 // Reverb parameters can be configured in audio/synthesis.c to meet desired aesthetic/performance needs. Currently US/JP only.
 //#define BETTER_REVERB

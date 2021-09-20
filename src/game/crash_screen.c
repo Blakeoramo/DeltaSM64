@@ -4,6 +4,7 @@
 #include <string.h>
 #include "buffers/framebuffers.h"
 #include "types.h"
+#include "game_init.h"
 #include "puppyprint.h"
 #include "audio/external.h"
 
@@ -305,8 +306,8 @@ void crash_screen_set_framebuffer(u16 *framebuffer, u16 width, u16 height) {
 
 void crash_screen_init(void) {
     gCrashScreen.framebuffer = (u16 *) gFrameBuffers[sRenderedFramebuffer];
-    gCrashScreen.width = SCREEN_WIDTH;
-    gCrashScreen.height = SCREEN_HEIGHT;
+    gCrashScreen.width = gScreenWidth;
+    gCrashScreen.height = gScreenHeight;
     osCreateMesgQueue(&gCrashScreen.mesgQueue, &gCrashScreen.mesg, 1);
     osCreateThread(&gCrashScreen.thread, 2, thread2_crash_screen, NULL,
                    (u8 *) gCrashScreen.stack + sizeof(gCrashScreen.stack),
