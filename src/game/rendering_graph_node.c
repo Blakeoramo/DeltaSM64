@@ -46,6 +46,7 @@ s16 gMatStackIndex;
 Mat4 gMatStack[32];
 Mtx *gMatStackFixed[32];
 f32 aspect;
+f32 gAspectMultiplyer;
 f32 gWorldScale = 1.0f;
 
 /**
@@ -325,8 +326,10 @@ static void geo_process_perspective(struct GraphNodePerspective *node) {
         Mtx *mtx = alloc_display_list(sizeof(*mtx));
         if (gConfig.widescreen && (gCurrLevelNum != 0x01)){
             aspect = 1.775f;
+			gAspectMultiplyer = 0.75f;
         } else {
             aspect = 1.33333f;
+			gAspectMultiplyer = 1;
         }
 
         if (gCamera)

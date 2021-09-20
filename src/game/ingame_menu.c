@@ -11,6 +11,7 @@
 #include "segment_symbols.h"
 #include "game_init.h"
 #include "gfx_dimensions.h"
+#include "rendering_graph_node.h"
 #include "ingame_menu.h"
 #include "level_update.h"
 #include "levels/castle_grounds/header.h"
@@ -86,7 +87,7 @@ enum DialogMark { DIALOG_MARK_NONE = 0, DIALOG_MARK_DAKUTEN = 1, DIALOG_MARK_HAN
 #define DEFAULT_DIALOG_BOX_SCALE 19.0f
 
 #if defined(VERSION_US) || defined(VERSION_EU)
-u8 gDialogCharWidths[256] = { // TODO: Is there a way to auto generate this?
+f32 gDialogCharWidths4by3[256] = { // TODO: Is there a way to auto generate this?
     7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  6,  6,  6,  6,  6,  6,
     6,  6,  5,  6,  6,  5,  8,  8,  6,  6,  6,  6,  6,  5,  6,  6,
     8,  7,  6,  6,  6,  5,  5,  6,  5,  5,  6,  5,  4,  5,  5,  3,
@@ -115,6 +116,39 @@ u8 gDialogCharWidths[256] = { // TODO: Is there a way to auto generate this?
     7,  5, 10,  5,  9,  8,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 #endif
     0,  0,  5,  7,  7,  6,  6,  8,  0,  8, 10,  6,  4, 10,  0,  0
+};
+#endif
+
+#if defined(VERSION_US) || defined(VERSION_EU)
+f32 gDialogCharWidths16by9[256] = { // TODO: Is there a way to auto generate this?
+    7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  7 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,
+    6 * 0.75f,  6 * 0.75f,  5 * 0.75f,  6 * 0.75f,  6 * 0.75f,  5 * 0.75f,  8 * 0.75f,  8 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  5 * 0.75f,  6 * 0.75f,  6 * 0.75f,
+    8 * 0.75f,  7 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  5 * 0.75f,  5 * 0.75f,  6 * 0.75f,  5 * 0.75f,  5 * 0.75f,  6 * 0.75f,  5 * 0.75f,  4 * 0.75f,  5 * 0.75f,  5 * 0.75f,  3 * 0.75f,
+    7 * 0.75f,  5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  6 * 0.75f,  5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  7 * 0.75f,  7 * 0.75f,  5 * 0.75f,  5 * 0.75f,  4 * 0.75f,  4 * 0.75f,
+    8 * 0.75f,  6 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    8 * 0.75f,  8 * 0.75f,  8 * 0.75f,  8 * 0.75f,  7 * 0.75f,  7 * 0.75f,  6 * 0.75f,  7 * 0.75f,  7 * 0.75f,  0,  0,  0,  0,  0,  0,  0,
+#ifdef VERSION_EU
+    6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  0,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  0,  4 * 0.75f,
+    5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  0,
+    5 * 0.75f,  5 * 0.75f,  5 * 0.75f,  0,  6 * 0.75f,  6 * 0.75f,  6 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  5 * 0.75f,  5 * 0.75f,  0,  0,  6 * 0.75f,  6 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  5 * 0.75f,  6 * 0.75f,
+    0,  4 * 0.75f,  4 * 0.75f,  0,  0,  5 * 0.75f,  5 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+#else
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4 * 0.75f,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  5 * 0.75f,  6 * 0.75f,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+#endif
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+#ifdef VERSION_EU
+    7 * 0.75f,  5 * 0.75f, 10 * 0.75f,  5 * 0.75f,  9 * 0.75f,  8 * 0.75f,  4 * 0.75f,  0,  0,  0,  0,  5 * 0.75f,  5 * 0.75f,  6 * 0.75f,  5 * 0.75f,  0,
+#else
+    7 * 0.75f,  5 * 0.75f, 10 * 0.75f,  5 * 0.75f,  9 * 0.75f,  8 * 0.75f,  4 * 0.75f,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+#endif
+    0,  0,  5 * 0.75f,  7 * 0.75f,  7 * 0.75f,  6 * 0.75f,  6 * 0.75f,  8 * 0.75f,  0,  8, 10,  6 * 0.75f,  4 * 0.75f, 10 * 0.75f,  0,  0
 };
 #endif
 
@@ -294,8 +328,11 @@ void render_generic_char(u8 c) {
     gDPPipeSync(gDisplayListHead++);
     gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, VIRTUAL_TO_PHYSICAL(packedTexture));
     #endif
-
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_tex_settings);
+	if (gConfig.widescreen) {
+		gSPDisplayList(gDisplayListHead++, dl_ia_text_tex_settings_16_9);
+	} else {
+		gSPDisplayList(gDisplayListHead++, dl_ia_text_tex_settings_4_3);
+	}
 }
 
 
@@ -324,7 +361,11 @@ void render_multi_text_string(s8 multiTextID)
 
     for (i = 0; i < textLengths[multiTextID].length; i++) {
         render_generic_char(textLengths[multiTextID].str[i]);
-        create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[textLengths[multiTextID].str[i]]), 0.0f, 0.0f);
+		if (gConfig.widescreen) {
+			create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[textLengths[multiTextID].str[i]]), 0.0f, 0.0f);
+		} else {
+			create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[textLengths[multiTextID].str[i]]), 0.0f, 0.0f);
+		}
     }
 }
 
@@ -403,7 +444,11 @@ void print_generic_string(s16 x, s16 y, const u8 *str) {
                 gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
                 break;
             case DIALOG_CHAR_SLASH:
-                create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[DIALOG_CHAR_SPACE] * 2), 0.0f, 0.0f);
+				if (gConfig.widescreen) {
+					create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[DIALOG_CHAR_SPACE] * 2), 0.0f, 0.0f);
+				} else {
+					create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[DIALOG_CHAR_SPACE] * 2), 0.0f, 0.0f);
+				}
                 break;
             case DIALOG_CHAR_MULTI_THE:
                 render_multi_text_string(STRING_THE);
@@ -412,7 +457,11 @@ void print_generic_string(s16 x, s16 y, const u8 *str) {
                 render_multi_text_string(STRING_YOU);
                 break;
             case DIALOG_CHAR_SPACE:
-                create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[DIALOG_CHAR_SPACE]), 0.0f, 0.0f);
+				if (gConfig.widescreen) {
+					create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[DIALOG_CHAR_SPACE]), 0.0f, 0.0f);
+				} else {
+					create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[DIALOG_CHAR_SPACE]), 0.0f, 0.0f);
+				}
                 break; // ? needed to match
             default:
                 render_generic_char(str[strPos]);
@@ -422,8 +471,11 @@ void print_generic_string(s16 x, s16 y, const u8 *str) {
                     gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
                     mark = DIALOG_MARK_NONE;
                 }
-
-                create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[str[strPos]]), 0.0f, 0.0f);
+				if (gConfig.widescreen) {
+					create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[str[strPos]]), 0.0f, 0.0f);
+				} else {
+					create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[str[strPos]]), 0.0f, 0.0f);
+				}
                 break; // what an odd difference. US added a useless break here.
         }
 
@@ -449,7 +501,7 @@ void print_hud_lut_string(s8 hudLUT, s16 x, s16 y, const u8 *str) {
     if (hudLUT == HUD_LUT_JPMENU) {
         xStride = 16;
     } else { // HUD_LUT_GLOBAL
-        xStride = 12; //? Shindou uses this.
+        xStride = (12 * gAspectMultiplyer); //? Shindou uses this. //spacing
     }
 
     while (str[strPos] != GLOBAR_CHAR_TERMINATOR) {
@@ -469,8 +521,8 @@ void print_hud_lut_string(s8 hudLUT, s16 x, s16 y, const u8 *str) {
                 }
 
                 gSPDisplayList(gDisplayListHead++, dl_rgba16_load_tex_block);
-                gSPTextureRectangle(gDisplayListHead++, curX << 2, curY << 2, (curX + 16) << 2,
-                                    (curY + 16) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+                gSPTextureRectangle(gDisplayListHead++, curX << 2, curY << 2, (curX + (16 * gAspectMultiplyer)) * 4,
+                                    (curY + 16) << 2, G_TX_RENDERTILE, 0, 0, 1024 / gAspectMultiplyer, 1 << 10);
 
                 curX += xStride;
         }
@@ -513,7 +565,11 @@ void print_menu_generic_string(s16 x, s16 y, const u8 *str) {
 
                     mark = DIALOG_MARK_NONE;
                 }
-                curX += gDialogCharWidths[str[strPos]];
+				if (gConfig.widescreen) {
+					curX += gDialogCharWidths16by9[str[strPos]];
+				} else {
+					curX += gDialogCharWidths4by3[str[strPos]];
+				}
         }
         strPos++;
     }
@@ -611,7 +667,11 @@ s16 get_str_x_pos_from_center(s16 centerPos, u8 *str, UNUSED f32 scale) {
     f32 spacesWidth = 0.0f;
 
     while (str[strPos] != DIALOG_CHAR_TERMINATOR) {
-        spacesWidth += gDialogCharWidths[str[strPos]];
+		if (gConfig.widescreen) {
+			spacesWidth += gDialogCharWidths16by9[str[strPos]];
+		} else {
+			spacesWidth += gDialogCharWidths4by3[str[strPos]];
+		}
         strPos++;
     }
     // return the x position of where the string starts as half the string's
@@ -625,7 +685,11 @@ s16 get_string_width(u8 *str) {
     s16 width = 0;
 
     while (str[strPos] != DIALOG_CHAR_TERMINATOR) {
-        width += gDialogCharWidths[str[strPos]];
+		if (gConfig.widescreen) {
+			width += gDialogCharWidths16by9[str[strPos]];
+		} else {
+			width += gDialogCharWidths4by3[str[strPos]];
+		}
         strPos++;
     }
     return width;
@@ -838,11 +902,19 @@ void render_star_count_dialog_text(s8 *xMatrix, s16 *linePos)
 
     if (tensDigit != 0) {
         if (xMatrix[0] != 1) {
-            create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[DIALOG_CHAR_SPACE] * xMatrix[0]), 0, 0);
+			if (gConfig.widescreen) {
+				create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[DIALOG_CHAR_SPACE] * xMatrix[0]), 0, 0);
+			} else {
+				create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[DIALOG_CHAR_SPACE] * xMatrix[0]), 0, 0);
+			}
         }
 
         render_generic_char(tensDigit);
-        create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32) gDialogCharWidths[tensDigit], 0, 0);
+		if (gConfig.widescreen) {
+			create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32) gDialogCharWidths16by9[tensDigit], 0, 0);
+		} else {
+			create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32) gDialogCharWidths4by3[tensDigit], 0, 0);
+		}
         xMatrix[0] = 1;
         linePos[0]++;
     }
@@ -851,11 +923,19 @@ void render_star_count_dialog_text(s8 *xMatrix, s16 *linePos)
 
 
     if (xMatrix[0] != 1) {
-        create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[DIALOG_CHAR_SPACE] * (xMatrix[0] - 1)), 0, 0);
+		if (gConfig.widescreen) {
+			create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[DIALOG_CHAR_SPACE] * (xMatrix[0] - 1)), 0, 0);
+		} else {
+			create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[DIALOG_CHAR_SPACE] * (xMatrix[0] - 1)), 0, 0);
+		}
     }
 
     render_generic_char(onesDigit);
-    create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32) gDialogCharWidths[onesDigit], 0, 0);
+	if (gConfig.widescreen) {
+		create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32) gDialogCharWidths16by9[onesDigit], 0, 0);
+	} else {
+		create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32) gDialogCharWidths4by3[onesDigit], 0, 0);
+	}
 
     linePos[0]++;
     xMatrix[0] = 1;
@@ -871,11 +951,19 @@ void render_multi_text_string_lines(s8 multiTextId, s8 lineNum, s16 *linePos, s8
 
     if (lineNum >= lowerBound && lineNum <= (lowerBound + linesPerBox)) {
         if (linePos[0] != 0 || (xMatrix != 1)) {
-            create_dl_translation_matrix(MENU_MTX_NOPUSH, (gDialogCharWidths[DIALOG_CHAR_SPACE] * (xMatrix - 1)), 0, 0);
+			if (gConfig.widescreen) {
+				create_dl_translation_matrix(MENU_MTX_NOPUSH, (gDialogCharWidths16by9[DIALOG_CHAR_SPACE] * (xMatrix - 1)), 0, 0);
+			} else {
+				create_dl_translation_matrix(MENU_MTX_NOPUSH, (gDialogCharWidths4by3[DIALOG_CHAR_SPACE] * (xMatrix - 1)), 0, 0);
+			}
         }
         for (i = 0; i < textLengths[multiTextId].length; i++) {
             render_generic_char(textLengths[multiTextId].str[i]);
-            create_dl_translation_matrix(MENU_MTX_NOPUSH, (gDialogCharWidths[textLengths[multiTextId].str[i]]), 0, 0);
+			if (gConfig.widescreen) {
+				create_dl_translation_matrix(MENU_MTX_NOPUSH, (gDialogCharWidths16by9[textLengths[multiTextId].str[i]]), 0, 0);
+			} else {
+				create_dl_translation_matrix(MENU_MTX_NOPUSH, (gDialogCharWidths4by3[textLengths[multiTextId].str[i]]), 0, 0);
+			}
         }
     }
     linePos += textLengths[multiTextId].length;
@@ -1007,12 +1095,21 @@ void handle_dialog_text_and_pages(s8 colorMode, struct DialogEntry *dialog, s8 l
             default: // any other character
                 if (lineNum >= lowerBound && lineNum <= lowerBound + linesPerBox) {
                     if (linePos || xMatrix != 1) {
-                        create_dl_translation_matrix(
-                            MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[DIALOG_CHAR_SPACE] * (xMatrix - 1)), 0, 0);
+						if (gConfig.widescreen) {
+							create_dl_translation_matrix(
+								MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[DIALOG_CHAR_SPACE] * (xMatrix - 1)), 0, 0);
+						} else {
+							create_dl_translation_matrix(
+								MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[DIALOG_CHAR_SPACE] * (xMatrix - 1)), 0, 0);
+						}
                     }
 
                     render_generic_char(strChar);
-                    create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths[strChar]), 0, 0);
+					if (gConfig.widescreen) {
+						create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths16by9[strChar]), 0, 0);
+					} else {
+						create_dl_translation_matrix(MENU_MTX_NOPUSH, (f32)(gDialogCharWidths4by3[strChar]), 0, 0);
+					}
                     xMatrix = 1;
                     linePos++;
                 }
@@ -1527,7 +1624,7 @@ void print_animated_red_coin(s16 x, s16 y) {
     s32 timer = gGlobalTimer;
 
     create_dl_translation_matrix(MENU_MTX_PUSH, x, y, 0);
-    create_dl_scale_matrix(MENU_MTX_NOPUSH, 0.2f, 0.2f, 1.0f);
+    create_dl_scale_matrix(MENU_MTX_NOPUSH, (0.2f * gAspectMultiplyer), 0.2f, 1.0f);
     gDPSetRenderMode(gDisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
 
     switch (timer & 6) {
