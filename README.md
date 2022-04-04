@@ -1,3 +1,11 @@
+# DeltaSM64
+**Read the HackerSM64 readme below for build instructions**
+- This repo is a fork of the HackerSM64 repo by Reonu, which includes the following changes in the HackerSM64 readme below
+- This repo is intended for the purpose of enabling greater freedom for making SM64 ROM hacks, (Or even just N64 homebrew) but at the cost of having less user friendliness
+- This repo is not designed for beginner decomp users, and is only recommended for experienced users only
+- This repo has changes both unique to this repo as well as changes that will be/have been implemented to the repo it was forked off of
+- Refer for commit history for changes made on this fork
+
 # ![](https://i.imgur.com/CeOukzk.gif) HackerSM64 ![](https://i.imgur.com/s0LUbTo.gif)
 
 **AFTER CLONING THE REPO, CHECK OUT THE `include/config` FOLDER BEFORE ANYTHING ELSE! THERE'S A LOT OF STUFF IN THIS REPO THAT CAN BE TOGGLED THERE.**
