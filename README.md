@@ -1,11 +1,3 @@
-# MOP5
-Read the HackerSM64 readme below for build instructions.
-
-**This repo is a fork of the HackerSM64 repo by Reonu, which includes the following changes in the HackerSM64 readme below:**
-- 
-- This fork adds more objects you can use in the game, including the objects from More Objects Patch 4 (by me).
-- Refer for commit history for legacy changes made on this fork
-#
 # ![](https://i.imgur.com/CeOukzk.gif) HackerSM64 ![](https://i.imgur.com/s0LUbTo.gif)
 
 **AFTER CLONING THE REPO, CHECK OUT THE `include/config` FOLDER BEFORE ANYTHING ELSE! THERE'S A LOT OF STUFF IN THIS REPO THAT CAN BE TOGGLED THERE.**

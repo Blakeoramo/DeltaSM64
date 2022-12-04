@@ -5,7 +5,6 @@
 #include "memory.h"
 #include "print.h"
 #include "segment2.h"
-#include "rendering_graph_node.h"
 
 /**
  * This file handles printing and formatting the colorful text that
@@ -371,18 +370,46 @@ void add_glyph_texture(s8 glyphIndex) {
     gSPDisplayList(gDisplayListHead++, dl_hud_img_load_tex_block);
 }
 
+#ifndef WIDESCREEN
+/**
+ * Clips textrect into the boundaries defined.
+ */
+void clip_to_bounds(s32 *x, s32 *y) {
+    if (*x < TEXRECT_MIN_X) {
+        *x = TEXRECT_MIN_X;
+    }
+
+    if (*x > TEXRECT_MAX_X) {
+        *x = TEXRECT_MAX_X;
+    }
+
+    if (*y < TEXRECT_MIN_Y) {
+        *y = TEXRECT_MIN_Y;
+    }
+
+    if (*y > TEXRECT_MAX_Y) {
+        *y = TEXRECT_MAX_Y;
+    }
+}
+#endif
+
 /**
  * Renders the glyph that's set at the given position.
  */
 void render_textrect(s32 x, s32 y, s32 pos) {
-    s32 rectBaseX = x + pos * (gAspectMultiplyer * 12);
+    s32 rectBaseX = x + pos * 12;
     s32 rectBaseY = 224 - y;
     s32 rectX;
     s32 rectY;
+
+#ifndef WIDESCREEN
+    // For widescreen we must allow drawing outside the usual area
+    clip_to_bounds(&rectBaseX, &rectBaseY);
+#endif
     rectX = rectBaseX;
     rectY = rectBaseY;
-    gSPTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + (15 * gAspectMultiplyer)) * 4,
-                        (rectY + 15) << 2, G_TX_RENDERTILE, 0, 0, 4096 / gAspectMultiplyer, 1 << 10);
+    gSPTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + 15) << 2,
+                        (rectY + 15) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
 }
 
 /**
@@ -406,7 +433,7 @@ void render_text_labels(void) {
         return;
     }
 
-    guOrtho(mtx, 0.0f, gScreenWidth, 0.0f, gScreenHeight, -10.0f, 10.0f, 1.0f);
+    guOrtho(mtx, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -10.0f, 10.0f, 1.0f);
     gSPPerspNormalize((Gfx *) (gDisplayListHead++), 0xFFFF);
     gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(mtx), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
