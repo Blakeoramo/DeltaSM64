@@ -24,6 +24,9 @@ struct ExclamationBoxContents sExclamationBoxContents[] = {
     { EXCLAMATION_BOX_BP_WING_CAP,         0, 0, MODEL_MARIOS_WING_CAP,  bhvWingCap               },
     { EXCLAMATION_BOX_BP_METAL_CAP,        0, 0, MODEL_MARIOS_METAL_CAP, bhvMetalCap              },
     { EXCLAMATION_BOX_BP_VANISH_CAP,       0, 0, MODEL_MARIOS_CAP,       bhvVanishCap             },
+	#ifdef PURPLE_EXCLAMATION_BLOCK
+	{ EXCLAMATION_BOX_BP_RANDOM_OBJECT,    0, 0, MODEL_NONE,             bhvRandomObject          },
+	#endif
     { EXCLAMATION_BOX_BP_KOOPA_SHELL,      0, 0, MODEL_KOOPA_SHELL,      bhvKoopaShell            },
     { EXCLAMATION_BOX_BP_COINS_1,          0, 0, MODEL_YELLOW_COIN,      bhvSingleCoinGetsSpawned },
     { EXCLAMATION_BOX_BP_COINS_3,          0, 0, MODEL_NONE,             bhvThreeCoinsSpawn       },
@@ -143,7 +146,11 @@ void exclamation_box_act_explode(void) {
     spawn_mist_particles_variable(0, 0, 46.0f);
     spawn_triangle_break_particles(20, MODEL_CARTOON_STAR, 0.3f, o->oAnimState);
     create_sound_spawner(SOUND_GENERAL_BREAK_BOX);
-    if (o->oBehParams2ndByte < EXCLAMATION_BOX_BP_COINS_1) {
+	#ifdef PURPLE_EXCLAMATION_BLOCK
+    if (o->oBehParams2ndByte < EXCLAMATION_BOX_BP_RANDOM_OBJECT || o->oBehParams2ndByte == EXCLAMATION_BOX_BP_KOOPA_SHELL) {
+	#else
+	if (o->oBehParams2ndByte < EXCLAMATION_BOX_BP_COINS_1) {
+	#endif
         o->oAction = EXCLAMATION_BOX_ACT_WAIT_FOR_RESPAWN;
         cur_obj_hide();
     } else {

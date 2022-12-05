@@ -19,6 +19,7 @@
 #include "config/config_movement.h"
 #include "config/config_objects.h"
 #include "config/config_rom.h"
+#include "config/config_mop5.h"
 
 
 /* WARNING: Compatibility safeguards - don't remove this file unless you know what you're doing */

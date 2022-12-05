@@ -398,6 +398,9 @@ extern const BehaviorScript bhvWingCap[];
 extern const BehaviorScript bhvMetalCap[];
 extern const BehaviorScript bhvNormalCap[];
 extern const BehaviorScript bhvVanishCap[];
+#ifdef PURPLE_EXCLAMATION_BLOCK
+extern const BehaviorScript bhvRandomObject[];
+#endif
 extern const BehaviorScript bhvStar[];
 extern const BehaviorScript bhvStarSpawnCoordinates[];
 extern const BehaviorScript bhvHiddenRedCoinStar[];

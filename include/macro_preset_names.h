@@ -65,6 +65,9 @@ enum MacroPresets {
     macro_box_wing_cap,
     macro_box_metal_cap,
     macro_box_vanish_cap,
+	#ifdef PURPLE_EXCLAMATION_BLOCK
+	macro_box_random_object,
+	#endif
     macro_box_koopa_shell,
     macro_box_one_coin,
     macro_box_three_coins,

@@ -372,6 +372,9 @@ void bhv_metal_cap_loop(void);
 void bhv_normal_cap_init(void);
 void bhv_normal_cap_loop(void);
 void bhv_vanish_cap_init(void);
+#ifdef PURPLE_EXCLAMATION_BLOCK
+void bhv_roulette_block_contents(void);
+#endif
 void bhv_collect_star_init(void);
 void bhv_collect_star_loop(void);
 void bhv_star_spawn_init(void);

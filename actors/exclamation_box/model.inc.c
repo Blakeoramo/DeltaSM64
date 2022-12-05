@@ -46,6 +46,18 @@ ALIGNED8 static const Texture exclamation_box_seg8_texture_08017E28[] = {
 #include "actors/exclamation_box/exclamation_box_side.rgba16.inc.c"
 };
 
+#ifdef PURPLE_EXCLAMATION_BLOCK
+// 0x08017628
+ALIGNED8 static const Texture exclamation_box_seg8_texture_purple_front[] = {
+#include "actors/exclamation_box/roulette_box_front.rgba16.inc.c"
+};
+
+// 0x08017E28
+ALIGNED8 static const Texture exclamation_box_seg8_texture_purple_side[] = {
+#include "actors/exclamation_box/roulette_box_side.rgba16.inc.c"
+};
+#endif
+
 // 0x08018E28
 static const Vtx exclamation_box_seg8_vertex_08018E28[] = {
     {{{   -25,      1,    -25}, 0, {   992,    992}, {0x00, 0x00, 0x81, 0xff}}},
@@ -247,3 +259,21 @@ const Gfx exclamation_box_seg8_dl_08019438[] = {
     gsDPLoadBlock(G_TX_LOADTILE, 0, 0, 64 * 32 - 1, CALC_DXT(64, G_IM_SIZ_16b_BYTES)),
     gsSPBranchList(exclamation_box_seg8_dl_08019280),
 };
+
+#ifdef PURPLE_EXCLAMATION_BLOCK
+// purple
+const Gfx exclamation_box_seg8_dl_purple[] = {
+    gsSPDisplayList(exclamation_box_seg8_dl_080192D0),
+    gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, exclamation_box_seg8_texture_purple_front),
+    gsDPLoadSync(),
+    gsDPLoadBlock(G_TX_LOADTILE, 0, 0, 32 * 32 - 1, CALC_DXT(32, G_IM_SIZ_16b_BYTES)),
+    gsSPDisplayList(exclamation_box_seg8_dl_08019220),
+    gsDPTileSync(),
+    gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_CLAMP, 6, G_TX_NOLOD),
+    gsDPSetTileSize(0, 0, 0, (64 - 1) << G_TEXTURE_IMAGE_FRAC, (32 - 1) << G_TEXTURE_IMAGE_FRAC),
+    gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, exclamation_box_seg8_texture_purple_side),
+    gsDPLoadSync(),
+    gsDPLoadBlock(G_TX_LOADTILE, 0, 0, 64 * 32 - 1, CALC_DXT(64, G_IM_SIZ_16b_BYTES)),
+    gsSPBranchList(exclamation_box_seg8_dl_08019280),
+};
+#endif

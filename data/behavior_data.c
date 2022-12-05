@@ -4544,6 +4544,15 @@ const BehaviorScript bhvVanishCap[] = {
     END_LOOP(),
 };
 
+#ifdef PURPLE_EXCLAMATION_BLOCK
+const BehaviorScript bhvRandomObject[] = {
+    BEGIN(OBJ_LIST_DEFAULT),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_roulette_block_contents),
+    END_LOOP(),
+};
+#endif
+
 const BehaviorScript bhvStar[] = {
     BEGIN(OBJ_LIST_LEVEL),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),

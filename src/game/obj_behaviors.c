@@ -761,6 +761,9 @@ UNUSED s32 debug_sequence_tracker(s16 debugInputSequence[]) {
 #include "behaviors/snowman.inc.c"
 #include "behaviors/boulder.inc.c"
 #include "behaviors/cap.inc.c"
+#ifdef PURPLE_EXCLAMATION_BLOCK
+#include "behaviors/roulette_block_contents.inc.c"
+#endif
 #include "behaviors/koopa_shell.inc.c"
 #include "behaviors/spawn_star.inc.c"
 #include "behaviors/red_coin.inc.c"

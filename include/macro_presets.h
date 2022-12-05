@@ -76,6 +76,9 @@ struct MacroPreset MacroObjectPresets[] = {
     {bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_WING_CAP  }, // macro_box_wing_cap
     {bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_METAL_CAP } , // macro_box_metal_cap
     {bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_VANISH_CAP}, // macro_box_vanish_cap
+	#ifdef PURPLE_EXCLAMATION_BLOCK
+	{bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_RANDOM_OBJECT}, // macro_box_random_object
+	#endif
     {bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_KOOPA_SHELL}, // macro_box_koopa_shell
     {bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_COINS_1}, // macro_box_one_coin - unused
     {bhvExclamationBox,                 MODEL_EXCLAMATION_BOX,              EXCLAMATION_BOX_BP_COINS_3}, // macro_box_three_coins
