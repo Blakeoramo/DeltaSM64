@@ -267,7 +267,10 @@ const LevelScript script_func_global_9[] = {
 
 const LevelScript script_func_global_10[] = {
     LOAD_MODEL_FROM_GEO(MODEL_BOO,                     boo_geo),
-    LOAD_MODEL_FROM_GEO(MODEL_BETA_BOO_KEY,               small_key_geo),
+	LOAD_MODEL_FROM_GEO(MODEL_BETA_BOO_KEY,            small_key_geo),
+	LOAD_MODEL_FROM_GEO(MODEL_BETA_BOO_KEY_RED,        small_key_geo_2),
+    LOAD_MODEL_FROM_GEO(MODEL_BETA_BOO_KEY_GREEN,      small_key_geo_3),
+    LOAD_MODEL_FROM_GEO(MODEL_BETA_BOO_KEY_BLUE,       small_key_geo_4),
     LOAD_MODEL_FROM_GEO(MODEL_HAUNTED_CHAIR,           haunted_chair_geo),
     LOAD_MODEL_FROM_GEO(MODEL_MAD_PIANO,               mad_piano_geo),
     LOAD_MODEL_FROM_GEO(MODEL_BOOKEND_PART,            bookend_part_geo),

@@ -32,6 +32,7 @@
 #include "save_file.h"
 #include "sound_init.h"
 #include "rumble_init.h"
+#include "boo_door.h"
 
 
 /**************************************************
@@ -1750,7 +1751,7 @@ s32 execute_mario_action(UNUSED struct Object *obj) {
             }
         }
 
-        sink_mario_in_quicksand(gMarioState);
+		sink_mario_in_quicksand(gMarioState);
         squish_mario_model(gMarioState);
         set_submerged_cam_preset_and_spawn_bubbles(gMarioState);
         update_mario_health(gMarioState);
@@ -1773,6 +1774,7 @@ s32 execute_mario_action(UNUSED struct Object *obj) {
         }
 
         play_infinite_stairs_music();
+		process_boo_door_interaction();
         gMarioState->marioObj->oInteractStatus = INT_STATUS_NONE;
 #if ENABLE_RUMBLE
         queue_rumble_particles(gMarioState);

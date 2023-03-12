@@ -75,6 +75,9 @@ extern const struct Animation *const mad_piano_seg5_anims_05009B14[];
 
 // small_key
 extern const GeoLayout small_key_geo[];
+extern const GeoLayout small_key_geo_2[];
+extern const GeoLayout small_key_geo_3[];
+extern const GeoLayout small_key_geo_4[];
 extern const Gfx small_key_seg5_dl_05006700[];
 extern const Gfx small_key_seg5_dl_05006A08[];
 extern const Gfx small_key_seg5_dl_05006A28[];

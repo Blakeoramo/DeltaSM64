@@ -370,6 +370,9 @@
 #define MODEL_BOOKEND_PART                0x58        // bookend_part_geo
 #define MODEL_BOOKEND                     0x59        // bookend_geo
 #define MODEL_HAUNTED_CAGE                0x5A        // haunted_cage_geo
+#define MODEL_BETA_BOO_KEY_RED            0x5B        // small_key_geo_2
+#define MODEL_BETA_BOO_KEY_GREEN          0x5C        // small_key_geo_3
+#define MODEL_BETA_BOO_KEY_BLUE           0x5D        // small_key_geo_4
 
 // group 10
 #define MODEL_BIRDS                       0x54        // birds_geo

@@ -717,6 +717,29 @@ void bhv_boo_with_cage_init(void) {
     }
 }
 
+void bhv_boo_with_key_init(void) {
+	u16 randomkey = random_u16();
+	if (randomkey <= 16383) {
+		struct Object *yellowkey = spawn_object(o, MODEL_BETA_BOO_KEY, bhvBetaBooKey);
+		yellowkey->oBehParams = o->oBehParams;
+	}
+	if (randomkey > 16383 && randomkey < 32766) {
+		struct Object *redkey = spawn_object(o, MODEL_BETA_BOO_KEY_RED, bhvBetaBooKey);
+		redkey->oBehParams = o->oBehParams;
+	}
+	if (randomkey > 32766 && randomkey < 49149) {
+		struct Object *greenkey = spawn_object(o, MODEL_BETA_BOO_KEY_GREEN, bhvBetaBooKey);
+		greenkey->oBehParams = o->oBehParams;
+	}
+	if (randomkey >= 49149) {
+		struct Object *bluekey = spawn_object(o, MODEL_BETA_BOO_KEY_BLUE, bhvBetaBooKey);
+		bluekey->oBehParams = o->oBehParams;
+	}
+	
+	
+    //cage->oBehParams = o->oBehParams;
+}
+
 static ObjActionFunc sBooWithCageActions[] = {
     boo_with_cage_act_0,
     boo_with_cage_act_1,

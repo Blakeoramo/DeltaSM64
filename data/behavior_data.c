@@ -1383,6 +1383,12 @@ const BehaviorScript bhvUnusedParticleSpawn[] = {
         CALL_NATIVE(bhv_unused_particle_spawn_loop),
     END_LOOP(),
 };
+//BOO DOOR BEHAVIOR
+const BehaviorScript bhvBooDoor[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    SET_INT(oInteractType, INTERACT_DOOR),
+    GOTO(bhvDoor + 1 + 1),
+};
 
 const BehaviorScript bhvUkiki[] = {
     BEGIN(OBJ_LIST_GENACTOR),
@@ -1952,15 +1958,15 @@ const BehaviorScript bhvBetaBooKey[] = {
     END_LOOP(),
 };
 
-const BehaviorScript bhvAlphaBooKey[] = {
-    BEGIN(OBJ_LIST_LEVEL),
-    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
-    SET_HITBOX(/*Radius*/ 32, /*Height*/ 64),
-    SET_INT(oIntangibleTimer, 0),
-    BEGIN_LOOP(),
-        CALL_NATIVE(bhv_alpha_boo_key_loop),
-    END_LOOP(),
-};
+//const BehaviorScript bhvAlphaBooKey[] = {
+    //BEGIN(OBJ_LIST_LEVEL),
+    //OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    //SET_HITBOX(/*Radius*/ 32, /*Height*/ 64),
+    //SET_INT(oIntangibleTimer, 0),
+    //BEGIN_LOOP(),
+        //CALL_NATIVE(bhv_alpha_boo_key_loop),
+    //END_LOOP(),
+//};
 
 const BehaviorScript bhvBulletBill[] = {
     BEGIN(OBJ_LIST_GENACTOR),
@@ -2953,6 +2959,21 @@ const BehaviorScript bhvBooWithCage[] = {
     SET_FLOAT(oGraphYOffset, 60),
     SET_OBJ_PHYSICS(/*Wall hitbox radius*/ 30, /*Gravity*/ 0, /*Bounciness*/ -50, /*Drag strength*/ 1000, /*Friction*/ 1000, /*Buoyancy*/ 200, /*Unused*/ 0, 0),
     CALL_NATIVE(bhv_boo_with_cage_init),
+    CALL_NATIVE(bhv_init_room),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_boo_with_cage_loop),
+    END_LOOP(),
+};
+const BehaviorScript bhvBooWithKey[] = {
+    BEGIN(OBJ_LIST_GENACTOR),
+    OR_INT(oFlags, (OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    SET_HOME(),
+    SET_INT(oDamageOrCoinValue, 3),
+    SET_HURTBOX(/*Radius*/ 80, /*Height*/ 120),
+    SET_HITBOX(/*Radius*/ 180, /*Height*/ 140),
+    SET_FLOAT(oGraphYOffset, 60),
+    SET_OBJ_PHYSICS(/*Wall hitbox radius*/ 30, /*Gravity*/ 0, /*Bounciness*/ -50, /*Drag strength*/ 1000, /*Friction*/ 1000, /*Buoyancy*/ 200, /*Unused*/ 0, 0),
+    CALL_NATIVE(bhv_boo_with_key_init),
     CALL_NATIVE(bhv_init_room),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_boo_with_cage_loop),
