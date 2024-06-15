@@ -34,6 +34,7 @@ u32 interact_bbh_entrance  (struct MarioState *m, u32 interactType, struct Objec
 u32 interact_warp          (struct MarioState *m, u32 interactType, struct Object *obj);
 u32 interact_warp_door     (struct MarioState *m, u32 interactType, struct Object *obj);
 u32 interact_door          (struct MarioState *m, u32 interactType, struct Object *obj);
+u32 interact_red_koopa_shell(struct MarioState *m, u32 interactType, struct Object *obj);
 u32 interact_cannon_base   (struct MarioState *m, u32 interactType, struct Object *obj);
 u32 interact_igloo_barrier (struct MarioState *m, u32 interactType, struct Object *obj);
 u32 interact_tornado       (struct MarioState *m, u32 interactType, struct Object *obj);
@@ -80,7 +81,7 @@ static struct InteractionHandler sInteractionHandlers[] = {
     { INTERACT_CLAM_OR_BUBBA,  interact_clam_or_bubba },
     { INTERACT_BULLY,          interact_bully },
     { INTERACT_SHOCK,          interact_shock },
-    { INTERACT_BOUNCE_TOP2,    interact_bounce_top },
+	{ INTERACT_RED_KOOPA_SHELL, interact_red_koopa_shell },
     { INTERACT_MR_BLIZZARD,    interact_mr_blizzard },
     { INTERACT_HIT_FROM_BELOW, interact_hit_from_below },
     { INTERACT_BOUNCE_TOP,     interact_bounce_top },
@@ -1459,6 +1460,54 @@ u32 interact_koopa_shell(struct MarioState *m, UNUSED u32 interactType, struct O
         push_mario_out_of_object(m, obj, 2.0f);
     }
 
+    return FALSE;
+}
+
+u32 interact_red_koopa_shell (struct MarioState *m, UNUSED u32 interactType, struct Object *obj) {
+	u32 interaction;
+	
+    interaction = determine_interaction(m, obj);
+	
+	obj->oInteractionSubtype = INT_SUBTYPE_KICKABLE;
+	
+	if (interaction & INT_HIT_FROM_ABOVE) {
+        bounce_off_object(m, obj, 30.0f);
+		if (obj->oBreakableBoxSmallReleased == FALSE) {
+			obj->oBreakableBoxSmallReleased = TRUE;
+		} else {
+			obj->oBreakableBoxSmallReleased = FALSE;
+			obj->oBreakableBoxSmallFramesSinceReleased = 0;
+		}
+	}
+
+    if (obj->oInteractionSubtype & INT_SUBTYPE_KICKABLE) {
+        u32 interaction = determine_interaction(m, obj);
+        if (interaction & (INT_KICK | INT_TRIP)) {
+			obj->oBreakableBoxSmallReleased = TRUE;
+            bounce_back_from_attack(m, interaction);
+            return FALSE;
+        }
+    }
+
+    if (able_to_grab_object(m, obj)) {
+        if (!(obj->oInteractionSubtype & INT_SUBTYPE_NOT_GRABBABLE)) {
+            m->interactObj = obj;
+            m->input |= INPUT_INTERACT_OBJ_GRABBABLE;
+            return TRUE;
+        }
+    }
+	
+	if ((!(m->action & ACT_FLAG_AIR))) {
+		push_mario_out_of_object(m, obj, -4.0f);
+	}
+	//AIR DIVING THROWING
+	if (((!(m->action & ACT_FLAG_AIR)) || (!(m->action & ACT_FLAG_DIVING))) && (obj->oBreakableBoxSmallReleased == TRUE)) {
+		if (obj->oBreakableBoxSmallFramesSinceReleased > 7) {
+			take_damage_from_interact_object(m);
+			return drop_and_set_mario_action(m, determine_knockback_action(m, obj->oDamageOrCoinValue),
+                                             obj->oDamageOrCoinValue);
+		}
+	}
     return FALSE;
 }
 

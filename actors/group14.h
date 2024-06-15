@@ -26,6 +26,9 @@ extern const struct Animation *const chain_chomp_seg6_anims_06025178[];
 // koopa
 extern const GeoLayout koopa_without_shell_geo[];
 extern const GeoLayout koopa_with_shell_geo[];
+extern const GeoLayout red_koopa_without_shell_geo[];
+extern const GeoLayout red_koopa_with_shell_geo[];
+extern const Gfx koopa_seg6_dl_red_koopa_shell[];
 extern const Gfx koopa_seg6_dl_06007658[];
 extern const Gfx koopa_seg6_dl_060076B0[];
 extern const Gfx koopa_seg6_dl_06007850[];
@@ -45,7 +48,7 @@ extern const Gfx koopa_seg6_dl_060086D0[];
 extern const Gfx koopa_seg6_dl_060089B0[];
 extern const Gfx koopa_seg6_dl_06008A68[];
 extern const Gfx koopa_seg6_dl_06008AC0[];
-extern const Gfx koopa_seg6_dl_06008B50[];
+extern const Gfx koopa_seg6_dl_06008B50[]; //red shoe
 extern const Gfx koopa_seg6_dl_0600B6E0[];
 extern const Gfx koopa_seg6_dl_0600B838[];
 extern const Gfx koopa_seg6_dl_0600B8B8[];

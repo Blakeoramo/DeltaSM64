@@ -2441,6 +2441,18 @@ const BehaviorScript bhvKoopaShell[] = {
     END_LOOP(),
 };
 
+const BehaviorScript bhvRedKoopaShell[] = {
+    BEGIN(OBJ_LIST_DESTRUCTIVE),
+    OR_INT(oFlags, (OBJ_FLAG_HOLDABLE | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    DROP_TO_FLOOR(),
+    SET_HOME(),
+    CALL_NATIVE(bhv_red_koopa_shell_init),
+    BEGIN_LOOP(),
+        SET_INT(oIntangibleTimer, 0),
+        CALL_NATIVE(bhv_red_koopa_shell_loop),
+    END_LOOP(),
+};
+
 const BehaviorScript bhvKoopaShellFlame[] = {
     BEGIN(OBJ_LIST_UNIMPORTANT),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
@@ -3706,6 +3718,20 @@ const BehaviorScript bhvBobomb[] = {
         CALL_NATIVE(bhv_bobomb_loop),
     END_LOOP(),
 };
+
+//const BehaviorScript bhvCreeper[] = {
+    //BEGIN(OBJ_LIST_DESTRUCTIVE),
+    //OR_INT(oFlags, (OBJ_FLAG_PERSISTENT_RESPAWN | OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_HOLDABLE | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    //LOAD_ANIMATIONS(oAnimations, bobomb_seg8_anims_0802396C),
+    //DROP_TO_FLOOR(),
+    //ANIMATE(BOBOMB_ANIM_WALKING),
+    //SET_INT(oIntangibleTimer, 0),
+    //SET_HOME(),
+    //CALL_NATIVE(bhv_bobomb_init),
+    //BEGIN_LOOP(),
+        //CALL_NATIVE(bhv_bobomb_loop),
+    //END_LOOP(),
+//};
 
 const BehaviorScript bhvBobombFuseSmoke[] = {
     BEGIN(OBJ_LIST_UNIMPORTANT),
@@ -5041,6 +5067,22 @@ const BehaviorScript bhvKoopa[] = {
     CALL_NATIVE(bhv_koopa_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_koopa_update),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvRedKoopa[] = {
+    BEGIN(OBJ_LIST_PUSHABLE),
+    OR_INT(oFlags, (OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    DROP_TO_FLOOR(),
+    LOAD_ANIMATIONS(oAnimations, koopa_seg6_anims_06011364),
+    ANIMATE(KOOPA_ANIM_WALK),
+    SET_HOME(),
+    SET_OBJ_PHYSICS(/*Wall hitbox radius*/ 50, /*Gravity*/ -400, /*Bounciness*/ 0, /*Drag strength*/ 0, /*Friction*/ 1000, /*Buoyancy*/ 200, /*Unused*/ 0, 0),
+    SCALE(/*Unused*/ 0, /*Field*/ 150),
+    SET_FLOAT(oKoopaAgility, 1),
+    CALL_NATIVE(bhv_koopa_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_red_koopa_update),
     END_LOOP(),
 };
 

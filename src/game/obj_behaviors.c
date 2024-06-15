@@ -765,6 +765,8 @@ UNUSED s32 debug_sequence_tracker(s16 debugInputSequence[]) {
 #include "behaviors/roulette_block_contents.inc.c"
 #endif
 #include "behaviors/koopa_shell.inc.c"
+//#include "print.h"
+#include "behaviors/red_koopa_shell.inc.c"
 #include "behaviors/spawn_star.inc.c"
 #include "behaviors/red_coin.inc.c"
 #include "behaviors/hidden_star.inc.c"

@@ -264,9 +264,13 @@ void shelled_koopa_attack_handler(s32 attackType) {
         if (attackType != ATTACK_FROM_ABOVE && attackType != ATTACK_GROUND_POUND_OR_TWIRL) {
             o->oMoveAngleYaw = obj_angle_to_object(gMarioObject, o);
         }
-
-        cur_obj_set_model(MODEL_KOOPA_WITHOUT_SHELL);
-        spawn_object(o, MODEL_KOOPA_SHELL, bhvKoopaShell);
+		if (obj_has_model(o, MODEL_KOOPA_WITH_SHELL)) {
+			cur_obj_set_model(MODEL_KOOPA_WITHOUT_SHELL);
+			spawn_object(o, MODEL_KOOPA_SHELL, bhvKoopaShell);
+		} else if (obj_has_model(o, MODEL_RED_KOOPA_WITH_SHELL)) {
+			cur_obj_set_model(MODEL_RED_KOOPA_WITHOUT_SHELL);
+			spawn_object(o, MODEL_RED_KOOPA_SHELL, bhvRedKoopaShell);
+		}
 
         //! Because bob-ombs/corkboxes come after koopa in processing order,
         //  they can interact with the koopa on the same frame that this
@@ -302,6 +306,113 @@ static void koopa_shelled_update(void) {
         case KOOPA_SHELLED_ACT_LYING:
             koopa_shelled_act_lying();
             break;
+    }
+
+    if (o->header.gfx.scale[0] > 0.8f) {
+        obj_handle_attacks(&sKoopaHitbox, o->oAction, sKoopaShelledAttackHandlers);
+    } else {
+        // If tiny koopa, die after attacking mario.
+        obj_handle_attacks(&sKoopaHitbox, KOOPA_SHELLED_ACT_DIE, sKoopaUnshelledAttackHandlers);
+        if (o->oAction == KOOPA_SHELLED_ACT_DIE) {
+            obj_die_if_health_non_positive();
+        }
+    }
+
+    cur_obj_move_standard(-78);
+}
+
+static void red_koopa_shelled_act_stopped(void) {
+    o->oForwardVel = 0.0f;
+    if (cur_obj_init_anim_and_check_if_end(KOOPA_ANIM_STOPPED)) {
+        o->oAction = KOOPA_SHELLED_ACT_WALK;
+        o->oKoopaTargetYaw = o->oMoveAngleYaw + 0x2000 * (s16) random_sign();
+    }
+}
+
+static void red_koopa_shelled_act_walk(void) {
+    if (o->oKoopaTurningAwayFromWall) {
+        o->oKoopaTurningAwayFromWall = obj_resolve_collisions_and_turn(o->oKoopaTargetYaw, 0x200);
+    } else {
+        // If far from home, then begin turning toward home
+        if (o->oDistanceToMario >= 25000.0f) {
+            o->oKoopaTargetYaw = o->oAngleToMario;
+        }
+
+        o->oKoopaTurningAwayFromWall = obj_bounce_off_walls_edges_objects(&o->oKoopaTargetYaw);
+        cur_obj_rotate_yaw_toward(o->oKoopaTargetYaw, 0x200);
+    }
+
+    switch (o->oSubAction) {
+        case KOOPA_SHELLED_SUB_ACT_START_WALK:
+            koopa_walk_start();
+            break;
+        case KOOPA_SHELLED_SUB_ACT_WALK:
+            koopa_walk();
+            break;
+        case KOOPA_SHELLED_SUB_ACT_STOP_WALK:
+            koopa_walk_stop();
+            break;
+    }
+
+    koopa_check_run_from_mario();
+}
+
+static void red_koopa_shelled_act_run_toward_mario(void) {
+    cur_obj_init_animation_with_sound(KOOPA_ANIM_SHELLED_RUN_AWAY);
+    koopa_play_footstep_sound(0, 11);
+
+    // If far from home, run toward it
+    if (o->oDistanceToMario >= 25000.0f) {
+        o->oDistanceToMario = 0.0f;
+    }
+
+    if (o->oTimer > 30 && o->oDistanceToMario > 800.0f) {
+        if (obj_forward_vel_approach(0.0f, 1.0f)) {
+            o->oAction = KOOPA_SHELLED_ACT_STOPPED;
+        }
+    } else {
+        cur_obj_rotate_yaw_toward(o->oAngleToMario, 0x400);
+        obj_forward_vel_approach(17.0f, 1.0f);
+    }
+}
+
+static void red_koopa_shelled_act_lying(void) {
+    if (o->oForwardVel != 0.0f) {
+        if (o->oMoveFlags & OBJ_MOVE_HIT_WALL) {
+            o->oMoveAngleYaw = cur_obj_reflect_move_angle_off_wall();
+        }
+
+        cur_obj_init_anim_extend(5);
+        koopa_dive_update_speed(0.3f);
+    } else if (o->oKoopaCountdown != 0) {
+        o->oKoopaCountdown--;
+        cur_obj_extend_animation_if_at_end();
+    } else if (cur_obj_init_anim_and_check_if_end(KOOPA_ANIM_STAND_UP)) {
+        o->oAction = KOOPA_SHELLED_ACT_STOPPED;
+    }
+}
+
+static void red_koopa_shelled_update(void) {
+    cur_obj_update_floor_and_walls();
+    obj_update_blinking(&o->oKoopaBlinkTimer, 20, 50, 4);
+
+    switch (o->oAction) {
+        case KOOPA_SHELLED_ACT_STOPPED:
+            red_koopa_shelled_act_stopped();
+            koopa_check_run_from_mario();
+            break;
+
+        case KOOPA_SHELLED_ACT_WALK:
+            red_koopa_shelled_act_walk();
+            break;
+
+        case KOOPA_SHELLED_ACT_RUN_FROM_MARIO:
+            red_koopa_shelled_act_run_toward_mario();
+            break;
+
+        case KOOPA_SHELLED_ACT_LYING:
+			red_koopa_shelled_act_lying();
+			break;
     }
 
     if (o->header.gfx.scale[0] > 0.8f) {
@@ -444,6 +555,103 @@ static void koopa_unshelled_update(void) {
         // case KOOPA_UNSHELLED_ACT_UNUSED3:
         //     cur_obj_init_anim_extend(KOOPA_ANIM_SHELLED_UNUSED3);
         //     break;
+    }
+
+    obj_handle_attacks(&sKoopaHitbox, o->oAction, sKoopaUnshelledAttackHandlers);
+    cur_obj_move_standard(-78);
+}
+
+static void red_koopa_unshelled_act_run(void) {
+    f32 distToShell = 99999.0f;
+    struct Object *shell;
+
+    cur_obj_init_animation_with_sound(KOOPA_ANIM_UNSHELLED_RUN);
+    koopa_play_footstep_sound(0, 6);
+
+    if (o->oKoopaTurningAwayFromWall) {
+        o->oKoopaTurningAwayFromWall = obj_resolve_collisions_and_turn(o->oKoopaTargetYaw, 0x600);
+    } else {
+        // If far from home, then turn toward home
+        if (o->oDistanceToMario >= 25000.0f) {
+            o->oKoopaTargetYaw = o->oAngleToMario;
+        }
+
+        // If shell exists, then turn toward shell
+        shell = cur_obj_find_nearest_object_with_behavior(bhvMario, &distToShell);
+        if (shell != NULL) {
+            //! This overrides turning toward home
+            o->oKoopaTargetYaw = obj_angle_to_object(o, shell);
+        } else if (!(o->oKoopaTurningAwayFromWall =
+                         obj_bounce_off_walls_edges_objects(&o->oKoopaTargetYaw))) {
+            // Otherwise run around randomly
+            if (o->oKoopaUnshelledTimeUntilTurn != 0) {
+                o->oKoopaUnshelledTimeUntilTurn--;
+            } else {
+                o->oKoopaTargetYaw = obj_random_fixed_turn(0x2000);
+            }
+        }
+
+        // If mario is far away, or our running away from mario coincides with
+        // running toward the shell
+        if (o->oDistanceToMario > 800.0f
+            || (shell != NULL
+                && abs_angle_diff(o->oKoopaTargetYaw, o->oAngleToMario) < 0x2000)) {
+            // then turn toward the shell
+            cur_obj_rotate_yaw_toward(o->oKoopaTargetYaw, 0x600);
+        } else {
+            // otherwise continue running from mario
+            cur_obj_rotate_yaw_toward(o->oAngleToMario, 0x600);
+        }
+    }
+
+    // If we think we have a shot, dive for the shell
+    if (obj_forward_vel_approach(20.0f, 1.0f) && distToShell < 600.0f
+        && abs_angle_diff(o->oKoopaTargetYaw, o->oMoveAngleYaw) < 0xC00) {
+        o->oMoveAngleYaw = o->oKoopaTargetYaw;
+        o->oAction = KOOPA_UNSHELLED_ACT_DIVE;
+        o->oForwardVel *= 1.2f;
+        o->oVelY = distToShell / 20.0f;
+        o->oKoopaCountdown = 20;
+    }
+}
+
+/**
+ * Dive and slide along the ground. If close enough to the shell, pick it up,
+ * and otherwise enter the running action.
+ */
+static void red_koopa_unshelled_act_dive(void) {
+    if (o->oTimer > 10) {
+        cur_obj_become_tangible();
+    }
+
+    if (o->oForwardVel != 0.0f) {
+        if (o->oAction == KOOPA_UNSHELLED_ACT_LYING) {
+            o->oAnimState = OBJ_BLINKING_ANIM_STATE_EYES_CLOSED;
+            cur_obj_init_anim_extend(KOOPA_ANIM_UNSHELLED_LYING);
+        } else {
+            cur_obj_init_anim_extend(KOOPA_ANIM_SHELLED_LYING);
+        }
+        koopa_dive_update_speed(0.5f);
+    } else if (o->oKoopaCountdown != 0) {
+        o->oKoopaCountdown--;
+        cur_obj_extend_animation_if_at_end();
+    } else if (cur_obj_init_anim_and_check_if_end(KOOPA_ANIM_STAND_UP)) {
+        o->oAction = KOOPA_UNSHELLED_ACT_RUN;
+    }
+}
+
+static void red_koopa_unshelled_update(void) {
+    cur_obj_update_floor_and_walls();
+    obj_update_blinking(&o->oKoopaBlinkTimer, 10, 15, 3);
+
+    switch (o->oAction) {
+        case KOOPA_UNSHELLED_ACT_RUN:
+            red_koopa_unshelled_act_run();
+            break;
+        case KOOPA_UNSHELLED_ACT_DIVE:
+        case KOOPA_UNSHELLED_ACT_LYING:
+            red_koopa_unshelled_act_dive();
+            break;
     }
 
     obj_handle_attacks(&sKoopaHitbox, o->oAction, sKoopaUnshelledAttackHandlers);
@@ -789,6 +997,37 @@ void bhv_koopa_update(void) {
                 break;
             case KOOPA_BP_NORMAL:
                 koopa_shelled_update();
+                break;
+            case KOOPA_BP_KOOPA_THE_QUICK_BOB:
+            case KOOPA_BP_KOOPA_THE_QUICK_THI:
+                koopa_the_quick_update();
+                break;
+        }
+    } else {
+        o->oAnimState = 1;
+    }
+
+    obj_face_yaw_approach(o->oMoveAngleYaw, 0x600);
+}
+
+void bhv_red_koopa_update(void) {
+    // PARTIAL_UPDATE
+
+    o->oDeathSound = SOUND_OBJ_KOOPA_FLYGUY_DEATH;
+
+    if (o->oKoopaMovementType >= KOOPA_BP_KOOPA_THE_QUICK_BASE) {
+        koopa_the_quick_update();
+    } else if (obj_update_standard_actions(o->oKoopaAgility * 1.5f)) {
+        o->oKoopaDistanceToMario = o->oDistanceToMario;
+        o->oKoopaAngleToMario = o->oAngleToMario;
+        treat_far_home_as_mario(1000.0f);
+
+        switch (o->oKoopaMovementType) {
+            case KOOPA_BP_UNSHELLED:
+                red_koopa_unshelled_update();
+                break;
+            case KOOPA_BP_NORMAL:
+                red_koopa_shelled_update();
                 break;
             case KOOPA_BP_KOOPA_THE_QUICK_BOB:
             case KOOPA_BP_KOOPA_THE_QUICK_THI:

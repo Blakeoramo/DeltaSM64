@@ -459,6 +459,15 @@ void print_generic_string(s16 x, s16 y, const u8 *str) {
     gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
 }
 
+void print_ia4_text(s16 x, s16 y, u8 red, u8 green, u8 blue, u8 alpha, const u8 *str) {
+    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_end);
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
+
+    gDPSetEnvColor(gDisplayListHead++, red, green, blue, alpha);
+    print_generic_string(x, y, str);
+	//gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
+}
+
 
 /**
  * Prints a hud string depending of the hud table list defined.

@@ -412,6 +412,7 @@
 #define MODEL_CHAIN_CHOMP                 0x66        // chain_chomp
 #define MODEL_KOOPA_FLAG                  0x6A        // koopa_flag_geo
 #define MODEL_WOODEN_POST                 0x6B        // wooden_post_geo
+#define MODEL_RED_KOOPA_WITH_SHELL        0x6C        // red_koopa_with_shell_geo
 
 // group 15
 #define MODEL_MIPS                        0x64        // mips_geo
@@ -514,8 +515,8 @@
 #define MODEL_SEAWEED                     0xC1        // seaweed_geo
 #define MODEL_AMP                         0xC2        // dAmpGeo
 #define MODEL_BOBOMB_BUDDY                0xC3        // bobomb_buddy_geo
-// find me
-// find me
+#define MODEL_RED_KOOPA_SHELL             0xC4        // red_koopa_shell_geo
+#define MODEL_RED_KOOPA_WITHOUT_SHELL     0xC5        // red_koopa_without_shell_geo
 // find me
 #define MODEL_SSL_TOX_BOX                 0xC7        // ssl_geo_000630
 #define MODEL_BOWSER_KEY_CUTSCENE         0xC8        // bowser_key_cutscene_geo
